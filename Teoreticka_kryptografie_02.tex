@@ -1,0 +1,143 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\noindent {\bf Tvrzení: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+\renewcommand\epsilon\varepsilon
+
+\begin{document}
+
+\podnadpis{12. 10. 2017}
+
+\tvrzeni Pokud $(G,E,D)$ splňuje perfect secrecy, pak platí $|\m K| \geq |\m M|$.
+
+\dukaz Nechť $|\m K| < |\m M|$. Nechť $M$ je rovnoměrné pravděpodobnostní rozdělení na $\m
+M$. Nechť $c \in \m C$:
+
+$Pr[E_k(M) = c] > 0$
+
+$\m M(c) := \{ m \mid m = D_k(c) \mbox{ pro $k \in \m K$}\}$
+
+Platí $|\m M(c)| \leq |\m K| < |\m M|$, tedy $\exists m' \in \m M: m' \notin \m M(c)$.
+
+Závěrem dostáváme: $Pr[M = m' \mid \m C = c] = 0 \neq Pr[M= m']=1/|\m M|$  \qed
+
+
+Kde můžeme slevit v nárocích na bezpečnost? První možností je předpokládat, že Eve je
+stále výpočetně neomezená, což vede na statistical security.
+
+\podnadpis{Statistical security}
+
+\definice Nechť $X, Y$ jsou náhodné proměnné nad $S$. Řekneme, že $X, Y$ jsou
+\textit{statistically $\epsilon$-in\-dis\-tin\-gui\-shable}, pokud $$\forall T 
+\subseteq S: |Pr[X \in T] - Pr[Y \in T]| \leq \epsilon.$$
+$T$ je statistický test.
+
+\definice $(G,E,D)$ splňuje \textit{statistical $\epsilon$-indistinguishability}, pokud
+$\forall m_0 \, \forall m_1 \in \m M$ jsou náhodné proměnné $E_k(m_0)$ a $E_k(m_1)$
+statistically $\epsilon$-indistinguishable, tj. $$\left|Pr[E_k(m_0) \in T] - Pr[E_k(m_1) \in
+T]\right| \leq \epsilon.$$
+
+Adversary má pravděpodobnost $\leq \epsilon$ nalézt $m$ z $c$.
+
+Podobně jako pro perfect secrecy platí $|\m K| \geq (1-\epsilon)|\m M|$.
+
+\podnadpis{Computational security}
+
+Jaká je výhoda kryptografie s důkazy? Z důkazů lze odvodit rozumný parametr, který nám dá
+délky klíčů, a napoví, s jakou pravděpodobností adversary prolomí protokol.
+
+\podnadpis{Asymptotická formalizace}
+\begin{itemize}
+\item "security parameter", Alice a Bob zvolí $n \in \mathbb{N}$
+\item Efektivní adversary PPT (probabilistic polynomial time), pro každý security parametr
+má program běžící čas $poly(n)$ (neuniformní)
+\item $(G,E,D)$ v fixním polynomiálním čase
+\item $|\m M|$ závisí na $n$: $\m M = \bigcup_n \m M_n$, kde např. $\m M_n = \{0,1\}^n$
+\end{itemize}
+
+\definice Funkce $\epsilon: \mathbb{N} \rightarrow [0,1]$ je \textit{negligible
+(zanedbatelná)}, pokud: $$\forall c \in \mathbb{N} \,\exists n_c \in \mathbb{N}\, \forall n >
+n_c: \epsilon(n) < \frac{1}{n^c}$$
+
+Příkladem negligible funkcí jsou $2^{-n}$, $n^{-\log(n)}$, $2^{-\sqrt{n}}$.
+
+\definice $(G,E,D)$ na prostoru zpráv $\m M = \bigcup_n \m M_n$, kde délka všech zpráv v
+$\m M_n$ je stejná, splňuje \textit{indistinguishability ciphertextů}, pokud $\forall$ PPT
+$A$ $\exists$ negligible $\epsilon$ takové, že
+$$\forall m_0, m_1 \in \m M_n: |Pr[A(E_k(m_0)) = 1] - Pr[A(E_k(m_1)) = 1]| \leq
+\epsilon(n)$$
+Pravděpodobnost je přes $k \leftarrow G(1^n)$ a náhodné mince $E$ a $A$. Ciphertext má
+vždy délku $\geq n$.
+
+Definice, kterou nebudeme používat: $(\epsilon,t)$ secure, pokud $\forall A$ běžící v čase
+$t$ platí podmínka.
+
+Asymptotická vs. konkrétní definice: $t$ ve specifickém výpočetním modelu ($2^{100}$ cyklů
+CPU) $(G,E,D)$ v čase $\ll t$, $\epsilon \leq 2^{-100}$
+
+Cíl: $(G,E,D)$, kde $|\m K| \ll |\m M$.
+
+Příklad, který nefunguje:
+
+Pravděpodobnostní OTP:\\
+$\m K = \{0, 1\}^n$ $\m M = \{0,1\}^{2n}$\\
+$E_k(m) = i_1, \dots, i_{2n} \leftarrow \{1, \dots, n\}$\\
+$c = (i_1, \dots, i_{2n}, m \oplus (k_{i_1}, k_{i_2}, \dots, k_{i_{2n}})$\\
+$G(1^n): k \leftarrow \{0,1\}^n$
+
+\definice $(G,E,D)$ nad $\m M = \bigcup_n \m M_n$, kde délka všech zpráv v
+$\m M_n$ je stejná, splňuje \textit{guessing indistinguishability
+ciphertextů}, pokud $\forall$ PPT $A$ $\exists$ negligible $\epsilon$ tak, že $A$ zvítězí
+v následující hře s pravděpodobností nejvýše $\frac{1}{2} + \epsilon(n)$.
+
+\begin{enumerate}
+\item $A$ zvolí $m_0, m_1 \in \m M_n$
+\item $k \leftarrow G(1^n)$ a $b \leftarrow \{0, 1\}$
+\item $A$ dostane $E_k(m_b)$ a vrátí $b'$
+\item $A$ zvítězí, pokud $b = b'$
+\end{enumerate}
+
+\tvrzeni $(G,E,D)$ splňuje indistinguishability ciphertextů právě tehdy, když splňuje
+guessing indistinguishability ciphertextů. 
+
+\dukaz "$\Leftarrow$" Mějme $\m A_i$ pro $m^*_0, m^*_1 \in \m M$, kde
+$$|Pr[\m A_i(E_k(m_0^*)) = 1] - Pr[\m A_i(E_k(m_1^*)) = 1]| \geq \frac{1}{p(n)}$$
+pro $p \in poly(n)$.
+
+Zkonstruujeme $\m A_{gi}$: 1) zvol $m_0^*$, $m_1^*$ 3) pro c odpověz $\m A_i(c)$
+
+$\m A_{gi}$ zvítězí s pravděpodobností $\geq \frac{1}{2} + \frac{1}{2p(n)}$.
+
+"$\Rightarrow$" Obdobně.
+
+\definice $(G,E,D)$ nad $\m M = \bigcup_n \m M_n$, kde délka všech zpráv v
+$\m M_n$ je stejná, splňuje \textit{semantic security}, pokud $\forall$
+PPT $A$ $\exists$ PPT $A'$ takový, že pro všechna rozdělení $M$ nad $\m M$ a každou funkci
+$f \colon \m M \rightarrow \{0, 1\}^*$ platí:
+$$Pr[A(E_k(M)) = f(M)] \leq Pr[A'(1^n) = f(M)] + \mbox{negl}(n)$$
+
+Autory definice jsou Goldwasser a Micali. $f$ je libovolná funkce jako například $f(m) =
+m$ nebo $f(m)=\mbox{50. bit $m$}$.  
+
+
+
+\tvrzeni (Bez důkazu) $(G,E,D)$ splňuje semantic security právě tehdy, když splňuje
+indistinguishability ciphertextů.
+
+\end{document}
