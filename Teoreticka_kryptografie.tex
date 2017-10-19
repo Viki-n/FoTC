@@ -1,0 +1,279 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\noindent {\bf Tvrzení: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+\begin{document}
+\podnadpis{Podmínky splnění předmětu}
+
+\noindent Bude celkem 6 úkolů, cvičení bude virtuální pouze prostřednictvím
+zadávání a řešení úkolů (zadávány na konci přednášky). Každý by měl odevzdat
+všechny, je nutné získat alespoň se 60 \% bodů.
+
+Na stránce předmětu je literatura, kvalitní je Katz + Lindell -- Introduction
+to Modern Crypto a Goldreich -- Foundation of Cryptography vol 1.
+ 
+\noindent Ani jedna z nich není dostupná v elektronické podobě. Proto aby
+existoval použitelný učební materiál, budeme my dělat zápisy, ty budou
+korekturovány a zveřejňovány. Za zápis z přednášky není potřeba odevzdat 1
+úkol. Zapsané zápisy posílat na adresu {\sl hubacek $^\star$at$^\star$ iuuk.mff.cuni.cz}.
+
+Hlavní část předmětu by mělo být plnění úkolů, deadline bude 2 týdny, na zkoušce
+si popovídáme o nějakých problémech.
+
+\nadpis{Foundations of Theoretical Cryptography}
+
+\podnadpis{Historie}
+
+\noindent První zmínky o kryptografii z r. 500 př. n. l., ale až do 2. sv.
+války byla kryptografie \uv{tajemným uměním}, až za 2. sv války začala být
+vědou.
+
+Vždy nejprve někdo navrhl systém, někdo jiný na něj navrhl útok, někdo ho
+opravil a potom se cyklil 2. a 3. bod.
+
+Systém byl považován za bezpečný, pokud ho toho času nikdo neuměl prolomit.
+
+\begin{itemize}
+\item 1940 -- Shannon přišel s rigorózním přístupem ke kryptografii
+\begin{itemize}
+\item definice perfect secrecy.
+
+\item ukázal, že perfect secrecy je nepraktická.
+\end{itemize}
+
+\item 1970 -- Diffie a Hellman
+\begin{itemize}
+\item definice Computational security
+
+\item přišli na to, že nepotřebujeme systémy, které nelze prolomit, stačí, když
+je nelze prolomit efektivně $\Rightarrow$ kryptografii lze budovat na obtížných
+problémech.
+
+\item win-win situace -- pokud se podaří prolomit šifru, tak máme alespoň
+řešení na nějaký obtížný problém.
+
+\end{itemize}
+
+\item1980 -- Goldmasser a Micali
+\begin{itemize}
+
+\item\uv{Rozumné} definice pro kryptografii
+
+\item konstrukce pro dané definice na základě předpokladů jako např. $P \neq
+NP$, faktorizace je obtížná\dots
+
+\item Pro to, abychom mohli věřit, že kryptografie existuje, je potřeba věřit,
+že $P \neq NP$ a většinou je potřeba i nějaký silnější předpoklad.
+
+\end{itemize}
+\end{itemize}
+
+\podnadpis {Šifrování:}
+
+\noindent Máme Alici a Boba, kteří by spolu rádi komunikovali, ovšem mají pouze
+kanál, který odposlouchává Eva (Eavesdropper)
+
+\begin{itemize}
+
+\item(realistická situace, postupně existovali kurýři, pošta, email, mobil\dots) 
+
+\item\uv{encryption scheme}/secret code/secret key
+
+\item dříve fungovala Stegamografie -- způsob, jak schovat data do jiné
+legitimně vypadající zprávy, v dnešní době ale tento přístup již není zajímavý.
+
+\end{itemize}
+
+\podnadpis{Public-key cryptography}
+
+\begin{itemize}
+
+\item bez sdíleného klíče
+
+\item autentizace a integrita dat
+
+\begin{itemize}
+
+\item Alice ověří zprávu od Boba (může si být jistá, že zpráva je opravdu od
+něj a nebyla modifikována)
+
+\end{itemize}
+
+\item Mimo komunikaci: secure computation
+
+\begin{itemize}
+
+\item protokoly pro aukce, e-cash, voting, kdy máme mnoho účastníků, adversary
+je interní -- chceme docílit toho, aby nikdo např. nemohl ovlivnit volby mimo
+váhu vlastního hlasu.
+
+\end{itemize}
+
+\end{itemize}
+
+\podnadpis{Vrstvy kryptografie}
+
+\begin{enumerate}
+
+\item Výpočetně složité problémy
+
+\begin{itemize}
+
+\item základní stavební kameny
+
+\item vycházejí z teorie složitosti nebo z výpočetní teorie čísel (v některých grupách diskrétní logaritmus, faktorizace,\dots)
+
+\item nutné předpoklady:
+
+\item u Shannona -- šifry použitelné, i když má Eva neomezenou výpočetní sílu. Zde nám ale stačí předpoklad, že náš problém je obtížný (nevíme ale, jestli nějaký takový opravdu existuje)
+
+\end{itemize}
+
+\item Kryptografická primitiva
+
+\begin{itemize}
+
+\item základní \uv{kryptografický úkol} -- šifrování, digitální podpis,
+pseudonáhodné generátory, zero-knowledge proof
+
+\item konstrukce s důkazy bezpečnosti
+
+\end{itemize}
+
+\item Protokoly
+
+\begin{itemize}
+
+\item aukce, voting,
+
+\item též máme důkazy bezpečnosti, ale většinou se pouze odkazují na důkazy
+předchozí vrstvy
+
+\end{itemize}
+
+\item Systémy
+
+\begin{itemize}
+
+\item TLS/SSL -- důkazy bezpečnosti většinou ještě neexistují, též jsou ale
+typicky nutné dobré stavební prvky z předchozích vrstev.
+
+\end{itemize}
+
+\end{enumerate}
+
+\podnadpis{Private-key Encryption (Symetric)}
+
+\noindent Alice a Bob mají sdílený klíč
+Předpoklady:
+
+\begin{itemize}
+
+\item Kerchhoffův princip: Předpokládáme, že encryption i decription algoritmy
+jsou známé, adversary nezná klíč. (dobrý předpoklad, algoritmy vždycky nakonec
+uniknou)
+
+\item insecure channel -- adversary vidí všechny správy, ale je pasivní (nemůže
+měnit, ničit, či tvořit vlastní zprávy)
+
+\end{itemize}
+
+\penalty -1000
+
+\definice {\it Private-key encryption scheme} s prostorem klíčů $\m K$,
+prostorem zpráv $\m M$ a prostorem ciphertextů $\m C$ je trojice algoritmů
+$(G,E,D)$, kde:
+
+\begin{itemize}
+
+\item $G$ generuje klíče z $\m K$, značíme $k \leftarrow G$, $k \in \m K$
+
+\item $E$ pro klíč $k \in \m K$ a zprávu $m \in \m M$ vrací ciphertext $c \in
+\m C$, značíme $c\leftarrow E_k(m)$.
+
+\item $D$ pro klíč $k \in \m K$ a cipher text $c \in \m C$ vrací zprávu $m$,
+značíme $m=D_k(c)$.
+
+\end{itemize}
+
+Šipky v definicích znamenají, že $G$ a $E$ není deterministický ale
+pravděpodobnostní, $D$ je naopak deterministický (to nás neomezuje, tyto
+případy se na sebe dají převést)
+
+Požadujeme korektnost, tedy $\forall k \in \m K, m \in \m M, D_k(E_k(m))=m$.
+
+Typicky $|\m M| \neq |\m C|$.
+
+Co od algoritmu chceme v rámci bezpečnosti
+- požadovat, aby ciphertext nic neříkal o klíči nefunguje.
+
+\definice Private-key encryption scheme splňuje {\it perfect
+indistinguishability}, pokud $\forall m_1, m_2 \in \m M, c \in \m C:
+Pr_{k\leftarrow \m K}[E_k(m_1)=c]=Pr_{k\leftarrow \m K}[E_k(m_2)=c]$,
+pravděpodobnost počítáme přes pravděpodobnost $k\leftarrow G$ a náhodné mince v
+$E$. \sskip
+
+Pokud jsme schopní splnit tohle, znamená to, že adversary z ciphertextu opravdu
+nezjistí vůbec nic, dokonce i kdyby znal část zprávy (klidně celou až na jeden
+bit).
+
+\priklad
+Shift cipher (Caesarova šifra)
+$\m K=\{0,1,\dots,25\}$,$\m M=\m C=\m K ^\ell$
+Substitution cipher
+$K=\Phi(25)$ (=permutace na $\{0,1,\dots,25\}$), $\m M=\m C=\m K^\ell$
+One-time pad(Vernamova šifra)
+$\m K=\m C=\m M=\{0,1\}^\ell$
+$E_k(m)=m \oplus k$, $D_k(m) = m \oplus k$\sskip
+
+\tvrzeni Caesarova šifra pro zprávy délky $\ell \geq 2$ nesplňuje perfect ind.\sskip
+
+\dukaz $m_1=aa$, $m_2=ab$, $c=xy$,
+$Pr_{k\leftarrow \m K}[E_k(m_2)=c]=\frac 1{26}$
+$Pr_{k\leftarrow \m K}[E_k(m_1)=c]=0$ \qed\sskip
+
+\tvrzeni OTP splňuje perfect ind.\sskip
+
+\dukaz
+$Pr_{k\leftarrow \m K}[E_k(m)=c] = Pr_{k\leftarrow \m K}[n=m \oplus c |
+k\leftarrow \{0,1\}^\ell]=2^{-\ell}$ \qed \sskip
+
+\definice $M$ je pravděpodobnostní rozdělení na $\m M$. Pak PK encryption
+scheme splňuje {\it Shannon secrecy} vzhledem k $M$, pokud $\forall m \in \m M,
+c \in \m C$ taková, že $Pr[E_k(m)=c]>0$ platí $Pr[M=m | E_k(m)=c]=Pr[M=m]$
+
+Pravděpodobnost přes $M$, $k \rightarrow \m K$ a $E$. \sskip
+
+\tvrzeni PK-encryption scheme splňuje perf. ind. právě když splňuje Shannon
+secrecy (vzhledem ke každému $M$, $Pr[M=m]>0 \forall m \in M$) Pak říkáme, že
+splňuje perfect secrecy.\sskip
+
+\dukaz "$\Rightarrow$"
+
+Bayesova věta: Pokud platí $Pr[B]>0$, pak $\forall A:$ $$Pr[A|B]={Pr[B|A]Pr[A]
+\over Pr[B]}.$$
+
+Z Bayesovy věty platí $$Pr[M=m|E_k(m)=c] =
+\frac{Pr[E_k(m)=c|M=m]Pr[M=m]}{Pr[E_k(m)=c]}.$$ Z perf. ind. ale platí, že
+$Pr[E_k(m)=c|M=m]=Pr[E_k(m)=c]$, tyto členy můžeme proti sobě tedy pokrátit
+a dostaneme $Pr[M=m|E_k(m)=c] = Pr[M=m]$, čímž je tato implikace dokázána.
+
+\bigskip \noindent Zbytek důkazu na příští přednášce.
+
+\end{document}
