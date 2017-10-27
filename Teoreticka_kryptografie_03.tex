@@ -1,0 +1,174 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+\usepackage{hyperref}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\noindent {\bf Tvrzení: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+\renewcommand\epsilon\varepsilon
+
+\begin{document}
+
+\podnadpis{19. 10. 2017}
+
+Naším cílem bude konstrukce private-key encryption scheme, které je computationally secure.
+Víme, že OTP je nepraktický, místo toho chceme jednoduché a bezpečné schéma + krátký klíč.
+Chceme tedy z krátkého klíče sestrojit pseudonáhodný ``pad'' (tím xorujeme zprávu).
+
+\podnadpis{Pseudonáhodné generátory \emph{PRG}}
+
+Vlastnosti, které očekáváme od pseudonáhodného řetězce délky $n$:
+\begin{itemize}
+	\item  jakýkoliv bit je rozdělený rovnoměrně, tj. je \emph{unbiased} = \emph{nestranný}, tedy $\Pr[x_i = 1] \approx \Pr[x_i = 0]$,
+	\item  nejdelší posloupnost samých jedniček je délky $\mathcal{O}(\log n)$,
+	\item  nelze efektivně komprimovat.
+		Kolmogorova složitost se v krypto moc nepoužívá, spíš chceme aby byl nerozlišitelný od náhodného stringu.
+\end{itemize}
+
+Návrhy PRG v praxi:
+\begin{itemize}
+	\item  stream ciphers:
+		\begin{itemize}
+			\item  ortogonální k tomu, o čem se budeme bavit,
+			\item  prakticky se věří, že jsou PRG, ale neumí se to dokázat $\rightarrow$ heuristické
+		\end{itemize}
+
+	\item  lineární kongruenční generátory
+		\begin{itemize}
+			\item  náhodně zvolená čísla $a, b, s_0 \leftarrow \mathbb{Z}_m$, pak volíme $s_i = s_{i - 1} a + b (\text{mod } m)$,
+			\item  dávají posloupnosti, které mají hodně korelací,
+			\item  musíme být opatrní i při použití pro simulace,
+			\item  dnes prolomeny
+		\end{itemize}
+\end{itemize}
+
+\definice Řekneme, že $G\colon \left\{ 0,1 \right\}^* \rightarrow \left\{ 0,1 \right\}^*$ je \emph{pseudonáhodný generátor} (\emph{PRG}), pokud platí:
+\begin{description}
+	\item[(efektivita)]  $G$ je \textit{deterministický} algoritmus pracující v polynomiálním čase
+	\item[(expanze)]  $|G(x)| = \ell(|x|)$ pro $\ell \colon \mathbb{N} \rightarrow \mathbb{N}$ t.ž. $\forall n\in \mathbb{N}\colon \ell(n) > n$
+	\item[(pseudonáhodnost)]  pro všechny PPT distinguishery\footnote{ne adversary $A$} $D$ existuje negligible $\varepsilon$ takové, že
+		$$\forall n\in \mathbb{N}\colon |\Pr[D(G(U_n)) = 1] - \Pr[D(U_{\ell(n)}) = 1] | \leq \varepsilon(n)$$
+		Kde $U_m$ značí uniformně náhodné bitové řetězce délky $m$ a pravděpodobnosti jsou přes tyto řetězce a náhodné bity $D$.
+\end{description}
+
+Kdyby $\ell(n) = n+1$, pak PRG generuje jen polovinu ze všech možných výstupů, obecně generuje jen $2^{n - \ell(n)}$ zlomek prostoru, ale přesto chceme neodlišitelnost.
+Pro naše aplikace chceme polynomiální stretch (o kolik se string protáhne).
+
+Historicky vstupům pseudonáhodných generátorů říkáme \emph{seed}.
+
+Pokud je $A$ PPT algoritmus a místo náhodných bitů dostává výstup PRG, pak se chová skoro stejně jako na skutečně náhodném vstupu.
+
+\definice Computational OTP Nechť $G$ je PRG, definujme encryption scheme $(G_{Enc}, E, D)$:
+\begin{description}
+	\item[($G_{Enc}$)]  $\m K \leftarrow \left\{ 0,1 \right\}^n$ (seed pro $G$)
+	\item[($E$)]  $E_{\m K}(m) = G(\m K) \oplus m$ pro $m \in \left\{ 0,1 \right\}^{\ell(n)}$
+	\item[($D$)]  $D_{\m K}(m) = G(\m K) \oplus c$
+\end{description}
+
+\tvrzeni Pokud $G$ je PRG, pak $(G_{Enc}, E, D)$ splňuje computational indistinguishability ciphertextů.
+
+\dukaz Nechť $A$ je PPT adversary, $m_0, m_1 \in \mathcal{M}$ zprávy.
+Naším cílem je ukázat, že distribuce ciphertextů pro $m_0, m_1$ nelze efektivně rozlišit.
+Budeme porovnávat ideální a reálný svět, definujme proto následující pravděpodobnostní distribuce:
+\begin{description}
+	\item[Real$_0$] $= E_{\m K}(m_0) = G(\m K) \oplus m_0$
+	\item[Real$_1$] $= E_{\m K}(m_1) = G(\m K) \oplus m_1$
+	\item[Ideal$_0$] $= \m K' \oplus m_0$ kde $\m K' \leftarrow \left\{ 0,1 \right\}^{\ell(n)}$
+	\item[Ideal$_1$] $= \m K' \oplus m_1$ kde $\m K' \leftarrow \left\{ 0,1 \right\}^{\ell(n)}$
+\end{description}
+Chceme dokázat, že \textbf{Real$_0$} nelze rozlišit od  \textbf{Real$_1$}.
+Víme, že  \textbf{Ideal$_0$} a \textbf{Ideal$_1$} jsou totožné distribuce (dle důkazu bezpečnosti OTP).
+Dokažme, že neumíme rozlišit \textbf{Real$_0$} od \textbf{Ideal$_0$} (a tím tedy ani nemůžeme rozlišit \textbf{Real$_0$} od \textbf{Real$_1$}).
+Nechť máme pro spor $D_{R, I}$ pro distribuce  \textbf{Real$_0$} a  \textbf{Ideal$_0$}, který je efektivní a platí
+$$|\Pr[D_{R,I}(\text{\textbf{Real}}_0) = 1] - \Pr[D_{R,I}(\text{\textbf{Ideal}}_0) = 1]| \geq \frac{1}{p(n)}$$
+kde $p$ je nějaký polynom.
+
+Potom definujeme distinguishera $D$ pro vstup $x$:
+\begin{itemize}
+	\item  $c = x \oplus m_0$ kde $x \leftarrow G(U_n)$
+	\item  $b' = D_{R,I}(c)$
+	\item  return $b'$
+\end{itemize}
+Vidíme, že $D(x)$ simuluje \textbf{Real}$_0$.
+Pokud $x \leftarrow U_{\ell(n)}$, pak $D(x)$ simuluje \textbf{Ideal}$_0$.
+Tedy $D(x)$ rozliší s pravděpodobností aspoň $\frac{1}{2} + \frac{1}{p(n)}$.
+\qed
+
+Optimálně bychom chtěli vědět, že pokud $P \neq NP$, pak existují PRG.
+Umíme dokázat, že pokud existují jednosměrné funkce (OWF), pak existují PRG (Johan Håstad,	Russell Impagliazzo,	Leonid A. Levin, Michael Luby).
+
+Neznáme moc pseudonáhodných generátorů, ale obecně věříme v existenci OWF, takže teoreticky máme i PRG.
+
+P, NP jsou worstcase třídy, tedy existuje problém a existují instance, které jsou těžké vyřešit.
+V~krypto chceme problémy obtížné on-average a navíc chceme generovat i obtížné problémy rovnou s jejich řešením.
+
+\url{http://blog.computationalcomplexity.org/2004/06/impagliazzos-five-worlds.html}
+
+\podnadpis{Jednosměrné funkce OWF}
+
+\definice Řekneme, že $f \colon \left\{ 0,1 \right\}^* \rightarrow \left\{ 0,1 \right\}^*$ je jednosměrná funkce \emph{OWF}, pokud:
+\begin{enumerate}
+	\item  $f$ lze snadno vyhodnotit (evaluate) v polynomiálním čase
+	\item  pro všechny PPT $A$ existuje negligible $\varepsilon$, taková že
+		$$\forall n \in \mathbb{N} \colon \Pr[A(f(x), 1^n) \in f^{-1}(f(x))] \leq \varepsilon(n)$$
+		kde pravděpodobnost je přes uniformně náhodné $x \in \left\{ 0,1 \right\}^n$ a mince $A$.
+		Navíc adversary $A$ nepotřebuje najít $x$, ale stačí mu libovolný předobraz $f(x)$ (jinak bychom museli konstantní nulu považovat za jednosměrnou funkci, což jistě nechceme).
+
+		Řekneme, že $f \colon \left\{ 0,1 \right\}^n \rightarrow \left\{ 0,1 \right\}^{\ell}$, kterou lze vyhodnotit v čase $\ll t$, je $(t, \varepsilon)$-jednosměrná funkce, pokud je bezpečná oproti všem adversary $A$ běžícím v čase $t$.
+\end{enumerate}
+
+\begin{description}
+	\item[factoring] 
+			Násobení dvou stejně dlouhých čísel:
+			$f(x,y)$ kde $\|x\| = \|y\| = n$ a $f(x,y) = xy$.
+			Přesněji řečeno $f$ bere náhodný řetězec $z$ a rozdělí ho na dvě stejně dlouhé části (pokud je liché délky, zapomene poslední bit), které vynásobí.
+
+			\definice Factoring předpoklad: pro všechny PPT $A$ existuje negligible $\varepsilon$ takové, že
+			$$\Pr[A(N) \in \left\{ P, Q \right\}] \leq \varepsilon(n)$$
+			kde $P,Q$ jsou náhodná prvočísla délky $n$ a $N = PQ$.
+
+			Silvio Micali řekl: ``Cryptographers seldom sleep well'' protože neví, kdo najde polynomiální algoritmus, který rozboří jejich předpoklad.
+
+			Nejdelší zatím prolomená RSA challenge měla 768 bitů a trvalo to zhruba 2000 CPU let na 2.2 GHz single core.
+
+			Nejlepší (asymptoticky) algoritmus na factoring má čas $\exp(\mathcal{O}(n^{1/2} \log^{1/2}n))$, nejlepší heuristický $\exp(\mathcal{O}(n^{1/3} \log^{1/3}n)))$.
+
+			Fakt: pokud factoring předpoklad platí, pak je násobení OWF.
+
+			Pokud existuje kvantový počítač, pak existuje efektivní algoritmus na faktorizaci (Shor's algorithm).
+
+		\item[subset sum]  $f(x_1, \dots, x_n, S) = (x_1, \dots, x_n, \sum_{i \in S} x_i \mod 2^n)$
+			kde $x_i \in \left\{ 0,1 \right\}^n$ a $S \subseteq 2^{\left\{ 1, \dots, n \right\}}$, tedy jde o vyřešení soustavy rovnic.
+			Víme, že tento problém je NP-úplný.
+
+		\item[DES, AES]  Blokové šifry DES a AES (ta druhá se používá například ve WiFi routerech) jsou heuristické konstrukce blokových šifer, tedy to jsou kandidáti na jednosměrné funkce, ale neumíme dokázat jejich bezpečnost.
+			Prolamovat umíme v podstatě jen pomocí bruteforce.
+\end{description}
+
+Je jednoduché rozmyslet, že funkce, kterou lze vyhodnotit v čase $t_0$ nemůže být:
+\begin{enumerate}
+	\item  $(\mathcal{O}(2^n t_0), 1)$-jednosměrná,
+	\item  $(\mathcal{O}(n), \max\left\{ 2^{-n}, 2^{-\ell} \right\})$-jednosměrná.
+\end{enumerate}
+Obecně se jedná o trade-off mezi 1. a 2.
+
+Co vlastně OWF schovávají?
+Třeba subset-sum vrací $n^2$ bitů $\overline{x}$.
+Pro $f$ jednosměrnou a $g(x,y) = (x, f(y))$ kde $|x| = |y|$ je funkce $g$ také jednosměrná, ale vrací polovinu vstupu.
+
+Příště ukážeme, že existence OWF implikuje existenci PRG, kde myšlenkou bude hardcore bit.
+\end{document}
