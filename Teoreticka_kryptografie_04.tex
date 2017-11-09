@@ -1,0 +1,200 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+\usepackage{hyperref}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\noindent {\bf Tvrzení: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+\renewcommand\epsilon\varepsilon
+
+\begin{document}
+
+\podnadpis{25. 10. 2017}
+
+Minule jsme si ukázali aplikace pseudonáhodných generátorů (značíme \emph{PRG} z anglického Pseudo Random Generator).
+Cílem této přednášky je ukázat, že \emph{PRG} je možné vytvořit z jednosměrných funkcí (tedy za poměrně slabého předpokladu).
+Jednosměrné funkce budeme značit \emph{OWF} z anglického One Way Functions.
+Ve skutečnosti si ale ukážeme slabší výsledek a to, že \emph{PRG} lze vytvořit~z jednosměrných permutací (\emph{OWP} -- One Way Permutations).
+Poznamenejme však, že Johan Håstad,	Russell Impagliazzo,	Leonid A. Levin, Michael Luby (A pseudorandom generator from any one way function) dokázali existenci \emph{PRG} i za slabšího předpokladu jednosměrných funkcí.
+
+\podnadpis{Hardcore bit}
+
+Připomeňme, že z definice \emph{OWF}, je sice těžké takové funkce invertovat.
+To nám ale nedává, že neumíme z jejího výstupu získat nějaký konkrétní bit vstupu.
+Například pro jednosměrnou funkci $f$ vytvoříme funkci $f'$ takovou, že $f'$ dostává na vstupu jeden bit navíc a ten pouze připojíme na výstup.
+Nová funkce $f'$ je stále jednosměrná, ale poslední bit vstupu jsme schopni určit.
+
+Proto používáme následující definici hardcore bitu zachycující obtížnost inverze jednosměrné funkce.
+Zhruba řečeno ta část vstupu, kterou jednosměrná funkce ochrání.
+Například si můžeme představit RSA a least significant bit.
+
+\definice Říkáme, že $b\colon \left\{ 0,1 \right\}^* \rightarrow \left\{ 0,1 \right\}$ je \emph{hardcore bit} pro jednosměrnou funkci $f$, pokud
+\begin{enumerate}
+	\item $b$ je počitatelná v polynomiálním čase
+	\item  Pro každý PPT algoritmus $A$ existuje negligible funkce $\epsilon$ taková, že
+		$$
+		\Pr[A(f(x)) = b(x)] \leq \frac{1}{2}+\epsilon (n),
+		$$
+		pro každou délku vstupu $n$, kde pravděpodobnost je přes volbu $x \leftarrow \{0,1\}^n$ a náhodné bity algoritmu $A$.
+\end{enumerate}
+
+Nyní si ukážeme, jak zkonstruovat hardcore bit pro libovolnou jednosměrnou funkci.
+Tuto konstrukci vymysleli Odded Goldreich a Leonid Levin (nalézt ji můžete třeba v knize Computational Complexity: A~modern approach -- Sanjeev Arora a Boaz Barak).
+
+\tvrzeni Nechť $f$ je \emph{OWF}, definujme $f'(x,r) = (f(x),r)$ pro $|r|=|x|$.
+Potom 
+$$
+\left<x,r\right> = \sum_{i\in \left\{ 1,\ldots , n \right\}} x_ir_i \mod 2 = \oplus_{i\in \left\{ 1, \ldots , n \right\}\ r_i=1}\ x_i
+$$ 
+je hardcore bit pro $f'$. 
+
+\dukaz Mějme PPT $A$, který předvídá $\left<x,r\right>$ z $(f(x),r)$ s nonnegligible výhodou $\frac{1}{p(n)}$.
+Chceme zkonstruovat PPT $B$, který za použití $A$ invertuje funkci $f$ na náhodném $x \leftarrow \{0,1\}^n$.
+Dělíme na následující případy:
+
+\begin{itemize}
+	\item \emph{Jednoduchý případ}
+
+		Předpokládejme, že $A$ předvídá $\left<x,r\right>$ vždy (s pravděpodobností 1).
+		Potom $B$ na vstupu $y$:
+		\begin{enumerate}
+			\item  Pro všechna $i \in \left\{ 1, \ldots ,n \right\}$ spočte $w_i = A\left( y,e^i \right)$, kde $e^i$ je vektor jehož $i$-tá souřadnice je 1 a zbytek 0.
+			\item  Vrátí $w_1w_2 \ldots w_n$.
+		\end{enumerate}
+		Jelikož $A$ předvídá $\left<x,r\right>$ vždy, každé $w_i$ je skutečně $i$-tý bit vstupu a proto $B$ vždy invertuje vstup.
+		Obecně je ale adversary $A$ horší.
+
+	\item  \emph{Středně těžký případ}
+		
+		Nechť $A$ je úspěšný s pravděpodobností alespoň $\frac{3}{4} + \frac{1}{p(n)}$.
+		Všimněme si, že 
+		\begin{align*}
+		\left<x,r\right>\oplus\left<x,r\oplus e^i\right> &= \sum_{j \in \left\{ 1,\ldots ,n \right\}} x_j r_j\mod 2\ \oplus \sum_{j \in \left\{ 1, \ldots ,n \right\}} x_j(r_j\oplus e_j^i) \mod 2 \\
+		&= \sum_{j \in \left\{ 1, \ldots , n \right\}} x_j (r_j\oplus r_j \oplus e_j^i) \mod 2 \\
+		&= \sum_{j \in \left\{ 1, \ldots , n \right\}} x_je^i_j \mod 2 \\
+		&= \left<x,e^i\right>.
+		\end{align*}
+		Navíc je-li $r\leftarrow\left\{ 0,1 \right\}^n$ rovnoměrně náhodně rozdělené, potom i $r \oplus e^i$ je rovnoměrně náhodně rozdělené.
+
+		Nový adversary $B$ na vstupu $y$ a s volbou $t = \Theta (\frac{n}{(\frac{1}{p(n)})^2})=\Theta (n\cdot p(n)^2)$:
+		\begin{enumerate}
+			\item Pro každé $i$, $1\leq i \leq n$: volíme náhodně nezávisle $r^i_1,r^i_2, \ldots , r^i_t \leftarrow \left\{ 0,1 \right\}^n$
+			\item Spočti $w_i = MAJ\left(\left\{(A(y,r^i_j) \oplus A(y,r^i_j\oplus e^i)\right\}_{j \in \{1, \ldots , t\}}\right)$, kde $MAJ$ (z anglického majority) vrací hodnotu, která se vyskytuje nejčastěji.
+			\item  Vrať $w_1w_2 \ldots w_n$
+		\end{enumerate}
+
+		\tvrzeni $B$ invertuje $f$ s nonnegligible pravděpodobností
+
+		Nejprve připomeňme následující dvě tvrzení z pravděpodobnosti, které se nám budou hodit v důkazu.
+
+		\tvrzeni \emph{(Union Bound)} Nechť $\{A_i\}_{i \in \{1,\ldots ,n\}}$ je konečně mnoho jevů z nichž každý nastane s pravděpodobností $\Pr[A_i]$.
+		Potom $\Pr\left[\bigcup_{i \in \{1,\ldots ,n\}} A_i\right] \leq \sum_{i \in \{1,\ldots ,n\}} \Pr\left[ A_i \right]$.
+
+
+		\tvrzeni \emph{(Chernoff bound)} Pro $\epsilon > 0$ a $b\in \left\{ 0,1 \right\}$ nechť $\{X_i\}_{i \in \left\{ 1,\ldots ,t \right\}}$ jsou nezávislé binární náhodné veličiny takové, že pro všechna $i\colon \Pr[X_i=b] = \frac{1}{2}+\epsilon$. Potom
+		$$
+		\Pr\left[ MAJ(\left\{ X_i \right\}_{i \in \left\{ 1, \ldots , t \right\}}) \neq b \right] \leq \exp\left(-\frac{\epsilon^2t}{2}\right).
+		$$
+
+		Definujeme množinu $GOOD\colon |GOOD| \geq \frac{1}{2}\frac{1}{p(n)}2^n$ taková, že
+		$$
+		\forall x \in GOOD\colon \Pr\left[A(f(x),r)=\left<x,r\right>\right] \geq \frac{3}{4} + \frac{1}{2}\frac{1}{p(n)},
+		$$
+		kde pravděpodobnost je přes $x \leftarrow \left\{ 0,1 \right\}^n$ a náhodné bity algoritmu $A$.
+		Všimněme si, že právě definovaná množina $GOOD$ vždy existuje.
+		Jinak 
+		\begin{align*}
+		\Pr[A(f(x),r) = \left<x,r\right>] &= \Pr[A(f(x),r)=\left<x,r\right>\mid x \notin GOOD]\cdot \Pr[x \notin GOOD] +\\
+		&+ \Pr[A(f(x),r)=\left<x,r\right>\mid x \in GOOD]\cdot \Pr[x \in GOOD] \\
+		&\leq \Pr[A(f(x),r)=\left<x,r\right>\mid x \notin GOOD] +  \Pr[x \in GOOD] \\
+		&< \left(\frac{3}{4} + \frac{1}{2}\frac{1}{p(n)}\right) + \frac{1}{2}\frac{1}{p(n)} = \frac{3}{4} + \frac{1}{p(n)}
+		\end{align*}
+		a tudíž není splněn předpoklad, že $A$ je úspěšný s pravděpodobností alespoň $\frac{3}{4} + \frac{1}{p(n)}$.
+
+		Stačí uvažovat $x$, která jsou z množiny $GOOD$ a ukázat, že na množině $GOOD$ umíme invertovat s nonnegligible pravděpodobností.
+		Potom umíme i na množině $2^n$ invertovat s nonnegligible pravděpodobností, protože množina $GOOD$ obsahuje $\frac{1}{poly(n)}$ zlomek všech možných vstupů.
+		Rozeberme si tedy s jakou pravděpodobností $B$ invertuje na vstupu $y=f(x)$ pro $x \in GOOD$.
+		Potom pro všechna $x \in GOOD$ a pro všechna $i \in \left\{ 1,\ldots , n \right\}$
+		$$
+		\Pr[A(f(x),r) \oplus A(f(x),r\oplus e^i) \neq x_i] \leq \frac{1}{2}-\frac{1}{p(n)},
+		$$
+		kde pravděpodobnost je přes náhodné bity $A$ a nerovnost platí za použití \emph{Union bound}.
+		Dále z \emph{Chernoffovy} nerovnosti dostáváme  
+		$$
+		\Pr[MAJ( \{A(f(x),r^i_j) \oplus A(f(x),r^i_j\oplus e^i)\}_{j \in \left\{ 1, \ldots , t \right\}}) \neq x_i] \leq \exp(-\frac{n}{2}),
+		$$
+		kde pravděpodobnost je zase přes náhodné bity algoritmu $A$ a $x$ je libovolné z množiny $GOOD$.
+		A konečně použijeme \emph{Union bound} a získáme, že $B$ invertuje pro $x$ z množiny $GOOD$ s pravděpodobností
+		$$
+		\Pr[B \text{ určil všechny bity správně}] \geq 1 - n\cdot \exp(-\frac{n}{2}) \geq \frac{1}{2}
+		$$
+	\item \emph{Nejtěžší případ}
+
+		Pro adversary $A$ pracující s nonnegligible pravděpodobností.
+		Na přednášce se neprobral, lze jej dohledat třeba v již dříve zmiňované knize Arora, Barak: Computational Complexity: A Modern Approach.
+\end{itemize}
+
+
+Jak jsme již zmiňovali dříve, nedokážeme existenci \emph{PRG} za předpokladu existence libovolné \emph{OWF}, ale dokážeme ji za předpokladu existence \emph{OWP} (jednosměrné permutace).
+Poznamenejme, že tento předpoklad je silnější díky známé blackbox separaci mezi \emph{OWP} a \emph{OWF} (viz A Dual Version of Reimer’s Inequality and a Proof of Rudich’s Conjecture -- Jeff Kahn, Michael Saks, Cliff Smyth).
+
+\definice \emph{Jednosměrná permutace OWP} je jednosměrná funkce, která je zároveň bijekce.
+
+Nyní ukážeme, že za předpokladu jednosměrných permutací, umíme vytvořit pseudonáhodný generátor s expanzí 1.
+Na příští přednášce toto tvrzení zesílíme.
+Za použití techniky hybridního argumentu (v kryptografii velmi rozšířená technika) dokážeme, že z libovolného \emph{PRG} s expanzí 1 lze vytvořit \emph{PRG} s neomezenou (čti libovolně, avšak polynomiálně velkou) expanzí.
+
+\tvrzeni Nechť $f$ je jednosměrná permutace a $b$ je její hardcore bit, potom
+$$
+G(s) = f(s)||b(s),
+$$
+kde $||$ značí konkatenaci, je pseudonáhodný generátor s expanzí 1.
+
+\dukaz
+Chceme ukázat, že pro libovolného distinguishera $D$ rozlišujícího výstup pseudonáhodného generátoru $G$ od náhodných bitů platí:
+$$
+\Pr[D(U_{n+1})=1] - \Pr[D(G(U_n))=1] \leq \epsilon(n),
+$$
+kde $\epsilon(n)$ je negligible funkce.
+Nejprve si uvědomme, že první pravděpodobnost můžeme přepsat do následující podoby:
+
+\begin{align*}
+\Pr[D(U_{n+1})=1] &= \Pr[D(U_n||U_1)=1] = \Pr[D(f(U_n)||U_1)=1]=\\ 
+&= \frac{1}{2}\Pr[D(f(U_n)||b(U_n))=1]+\frac{1}{2}\Pr[D(f(U_n)||\overline{b(U_n)})=1],
+\end{align*}
+pro druhou rovnost využíváme faktu, že $f$ je jednosměrná permutace.
+Nyní nahradíme $\Pr[D(U_{n+1})=1]$ za právě získaný výraz 
+$\frac{1}{2}\Pr[D(f(U_n)||b(U_n))=1]+\frac{1}{2}\Pr[D(f(U_n)||\overline{b(U_n)})=1]$ a dostáváme, že chceme dokázat:
+\begin{align*}
+	\frac{1}{2}\Pr[D(f(U_n)||\overline{b(U_n)}) = 1]-\frac{1}{2}\Pr[D(f(U_n)||b(U_n))=1] \leq \epsilon(n)
+\end{align*}
+
+Vytvořme adversary $\mathcal{A}$, který dostane $y \leftarrow f(U_n)$ a předpovídá $b(U_n)$ a to tak, že volí $r' \leftarrow \left\{ 0,1 \right\}$ náhodně a pokud $D(y||r')=0$ vystoupí $r'$ jinak vystoupí $\overline{r'}$. Potom
+
+\begin{align*}
+	\Pr[\mathcal{A}(f(U_n))=b(U_n)]&=\frac{1}{2}\Pr[\mathcal{A}(f(U_n))=b(U_n)\mid r'=b(U_n)]+\frac{1}{2}\Pr[\mathcal{A}(f(U_n))=b(U_n) \mid r' \neq b(U_n)]=\\
+	&=\frac{1}{2}\left(\Pr[D(f(U_n||b(U_n)))=0] + \Pr[D(f(U_n))||\overline{b(U_n)}=1]\right)= \\
+	&=\frac{1}{2}\left(1-\Pr[D(f(U_n||b(U_n)))=1] + \Pr[D(f(U_n))||\overline{b(U_n)}=1]\right)= \\
+	&=\frac{1}{2}-\frac{1}{2}\Pr[D(f(U_n||b(U_n)))=1]+\frac{1}{2}\Pr[D(f(U_n))||\overline{b(U_n)}=1]\leq \frac{1}{2}+\epsilon(n)
+\end{align*}
+Poslední nerovnost plyne z toho, že $f$ je jednosměrná funkce a tudíž $\mathcal{A}$ na vstupu $f(U_n)$ předpovídá $b(U_n)$ s negligible pravděpodobností.
+Dostáváme, že 
+$$
+\frac{1}{2}\Pr[D(f(U_n))||\overline{b(U_n)}=1]-\frac{1}{2}\Pr[D(f(U_n||b(U_n)))=1] \leq \epsilon(n)
+$$
+
+\end{document}
