@@ -1,0 +1,187 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+\usepackage{hyperref}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\noindent {\bf Tvrzení: }}
+\def\pozorovani{\noindent {\bf Pozorování: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+\renewcommand\epsilon\varepsilon
+
+\begin{document}
+
+\podnadpis{9. 11. 2017}
+
+
+\veta Nechť $G: \left\lbrace 0,1\right\rbrace^{n} \rightarrow \left\lbrace 0,1\right\rbrace^{n+1}$ je pseudonáhodný generátor. Definujeme $G_l\left(s_0\right) = b_1b_2\dots b_l$, kde pro každé $i \in \left\lbrace 0, \dots, l-1\right\rbrace$ platí, že $s_{i+1}\parallel b_{i+1} = G\left(s_i\right)$. (Aplikací $G$ na $s_i$ získáme bit výstupu $b_{i+1}$ a nový seed $s_{i+1}$.) Pak $G_l$ je pseudonáhodný generátor s expanzí $l$ pro každé $l \in \hbox{poly}\left(n\right)$.
+
+\dukaz (pomocí hybridního argumentu)
+
+Pro každé $n$ a $0 \le j \le l$ položíme $H_{n}^{j} := U_j \parallel G_{l-j}\left(U_n\right)$, kde $U_k$ je rovnoměrné rozdělení délky $k$. Speciálně platí, že $H_{n}^{0} = G_l\left(U_n\right)$ a $H_{n}^{l} = U_l$.
+
+Dále nechť $D$ je PPT distinguisher pro $G_l$. Potřebujeme ukázat, že pro každé $n$ platí, že 
+$$\left| \hbox{Pr}\left[D\left(G\left(U_n\right)\right) = 1\right] - \hbox{Pr}\left[D\left(U_l\right) = 1\right] \right| \le \hbox{neg}\left(n\right).$$
+
+Pomocí $D$ zkonstruujeme distinguisher $D'$ pro $G$.
+\begin{center}
+  \parbox[c]{0.8\linewidth}{
+    \begin{enumerate}
+      \item [$D'\left(w\right):$]  \hspace{1cm} $w\in\left\lbrace 0, 1\right\rbrace^{n+1}$
+      \item $j \leftarrow \left\lbrace 1, \dots , l\right\rbrace$, $w = s_j\parallel b_j$;
+      \item $b_1, \dots, b_{j-1} \leftarrow \left\lbrace 0,1\right\rbrace$;
+      \item $b_{j+1},\dots, b_l \leftarrow G_{l-j}\left(s_j\right)$;
+      \item vrať $D\left(b_1,\dots,b_l\right)$;
+    \end{enumerate}
+  }
+\end{center}
+
+Nechť $D'$ zvolí $j = j^{\ast}$.
+\begin{itemize}
+  \item Pro $w \leftarrow U_{n+1}$ dostane $D$ distribuci odpovídající $H_{n}^{j^{\ast}}$. Pak platí, že
+    $$\hbox{Pr}\left[D'\left(U_{n+1}\right) = 1 \mid j^\ast = j\right] = \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}}\right) = 1\right],$$
+    $$\hbox{Pr}\left[D'\left(U_{n+1}\right) = 1\right] = \frac{1}{l}\sum_{j^\ast = 1}^{l} \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}}\right) = 1\right].$$  
+  
+  \item Pro $w \leftarrow G\left(U_n\right)$ dostane $D$ distribuci odpovídající $H_{n}^{j^{\ast}-1}$. Potom platí, že
+    $$\hbox{Pr}\left[D'\left(G\left(U_{n}\right)\right) = 1 \mid j^\ast = j\right] = \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}-1}\right) = 1\right],$$
+    $$\hbox{Pr}\left[D'\left(G\left(U_{n}\right)\right) = 1\right] = \frac{1}{l}\sum_{j^{\ast} = 1}^{l} \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}-1}\right) = 1\right] = \frac{1}{l}\sum_{j^\ast = 0}^{l-1} \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}}\right) = 1\right].$$
+\end{itemize}
+
+Pro nějakou negligible funkci $\varepsilon$ dostáváme, že
+  $$\varepsilon\left(n\right) > \left|\hbox{Pr}\left[D'\left(G\left(U_n\right)\right) = 1\right] - \hbox{Pr}\left[D'\left(U_{n+1}\right) = 1\right]\right| =$$
+  $$ = \frac{1}{l}\left|\sum_{j^\ast = 0}^{l-1} \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}}\right) = 1\right] - \sum_{j^\ast = 1}^{l} \hbox{Pr}\left[D\left(H_{n}^{j^{\ast}}\right) = 1\right]\right| = $$
+  $$ = \frac{1}{l}\left| \hbox{Pr}\left[D\left(H_{n}^{0}\right) = 1\right] - \hbox{Pr}\left[D\left(H_{n}^{l}\right) = 1\right]\right|.$$
+  
+  Tedy $ \left| \hbox{Pr}\left[D\left(H_{n}^{0}\right) = 1\right] - \hbox{Pr}\left[D\left(H_{n}^{l}\right) = 1\right]\right| < l\varepsilon\left(n\right)$, což je stále negligible funkce.
+
+\qed
+
+Z tvrzení z minulé přednášky (PRG s expanzí 1 + OWP) a z předchozí věty dostaneme pseudonáhodný generátor $G$.
+Nechť $f$ je OWP a $b$ její hardcore bit. Pak položme
+$$G\left(x\right) = b\left(x\right) \parallel b\left(f\left(x\right)\right) \parallel b\left(f\left(f\left(x\right)\right)\right)  \parallel \dots$$ Generátor $G$ pak má následující vlastnosti:
+\begin{itemize}
+  \item efektivní online výpočet,
+  \item nemusíme znát expanzi apriori,
+  \item security degraduje se zvyšujícím se $l$.
+\end{itemize}
+
+
+\nadpis{Kolekce jednosměrných funkcí}
+
+\definice $\mathcal{F} = \left\lbrace f_{key} : D_{key} \rightarrow R_{key}\right\rbrace_{key \in \mathcal{K}}$ je kolekcí OWFs, pokud
+\begin{enumerate}
+  \item $\exists{\hbox{ PPT } G\left(1^n\right)}$, který vrací $key \in \mathcal{K}$,
+  \item se znalostí $key$ lze v polynomiálním čase vybrat z rovnoměrného rozdělení na $D_{key}$,
+  \item  $f_{key}$ lze vyhodnotit v polynomiálním čase $\left(\forall{key\in \mathcal{K}}\right)\left(\forall{x \in D_{key}}\right)$,
+  \item $\left(\forall{\hbox{ PPT } A}\right) \left(\exists{\varepsilon \hbox{ negligible}}\right) \hbox{Pr}\left[A\left(1^n, k, f_k\left(x\right)\right) \in f_{k}^{-1}\left(f_k\left(x\right)\right)\right] \le \varepsilon\left(n\right)$, $\forall{n}$, kde pravděpodobnost je přes $k \leftarrow G\left(1^n\right)$, $x \leftarrow D_k$ a náhodné mince $A$.
+\end{enumerate}
+$\mathcal{F}$ je kolekcí náhodných permutací, pokud $f_{key}$ je permutací $\forall{key \in \mathcal{K}}$.
+
+
+\paragraph{Značení:}
+\begin{itemize}
+  \item $\mathbb{Z}_n^\ast = \left\lbrace a \in \mathbb{Z}_n \mid gcd\left(a, n\right) = 1\right\rbrace$.
+  \item $\varphi\left(n\right)$ je Eulerova funkce, $\varphi\left(n\right) = \left|\mathbb{Z}_n^\ast\right|$.
+  \item pro $n \in \mathbb{N}$ budeme značit $\left\Vert n \right\Vert$ délku zápisu čísla $n$ v binární soustavě.
+\end{itemize} 
+
+
+\podnadpis{RSA kolekce}
+\begin{itemize}
+  \item prostor klíčů: $\mathcal{K} = \left\lbrace \left(N, e\right) \mid N = pq, \hbox{ pro } p,q \hbox{ prvočísla }, \left\Vert p\right\Vert = \left\Vert q\right\Vert, e \in \mathbb{Z}_{\varphi\left(N\right)}^\ast \right\rbrace$.
+  
+  \item generování klíčů: PPT $G\left(1^n\right)$: 
+    \begin{itemize}
+      \item vybere náhodná $n$-bitová prvočísla $p$ a $q$, 
+      \item $N = pq$,
+      \item vygeneruje náhodné $e \in \mathbb{Z}_{\varphi\left(N\right)}^\ast$,
+      \item vrátí $\left(N,e\right)$.    
+    \end{itemize}
+  
+  \item funkce: $f_{N, e}: \mathbb{Z}_N^\ast \rightarrow \mathbb{Z}_N^\ast$, $f_{N,e}\left(x\right) = x^e \mod N$.
+\end{itemize}
+
+\pozorovani RSA je kolekce permutací.
+
+\dukaz $D_{key} = R_{key} = \mathbb{Z}_N^\ast$.
+
+$e \in \mathbb{Z}_{\varphi\left(N\right)}^\ast \Longrightarrow \left(\exists{d \in \mathbb{Z}_{\varphi\left(N\right)}^\ast}\right) ed = 1 \left(\mod \varphi\left(N\right)\right)$.
+
+Existuje tedy inverzní zobrazení: $y \longrightarrow y^d \mod N$.
+
+Ověříme, že inverzní zobrazení opravdu funguje: $\left(f_{N,e}\left(x\right)\right)^d \equiv \left(x^e\right)^d \equiv x^{ed} \equiv x \left(\mod N\right)$.
+Při úpravách kongruencí jsme využili Lagrangeovu větu: Pro každou grupu $\left(G, \ast\right)$ platí, že $$\left(\forall{a \in G}\right) \underbrace{a \ast \dots \ast a}_{n} = a^{\left| G\right|} = e.$$ 
+
+\qed
+
+\podnadpis{Rabinova kolekce}
+\begin{itemize}
+  \item prostor klíčů: $\mathcal{K} = \left\lbrace N \mid N = pq, \hbox{ pro prvočísla } p, q, \left\Vert p \right\Vert = \left\Vert q \right\Vert\right\rbrace$,
+  
+  \item generátor: PPT $G\left(1^n\right)$ generuje $n$-bitová prvočísla $p, q$,
+  
+  \item funkce: $f_N: \mathbb{Z}_N^\ast \rightarrow \mathbb{Z}_N^\ast$, $f_N\left(x\right) = x^2 \mod N$.
+\end{itemize}
+
+\tvrzeni Rabinova kolekce je kolekce jednosměrných funkcí, když neexistuje efektivní algoritmus pro faktorizaci přirozených čísel. 
+
+\dukaz (pouze \uv{$\Leftarrow$} - Kdyby nebyla jednosměrná, tak umím faktorizovat.)
+
+Nechť $A$ invertuje Rabinovu kolekci s pstí $\ge \varepsilon\left(n\right)$ (non-negligible $\varepsilon$, pravděpodobnost přes volbu klíče a volbu náhodného $x$).
+
+Zkonstruujeme $A'\left(n\right)$:
+\begin{enumerate}
+  \item $x \leftarrow \mathbb{Z}_N^\ast$;
+  \item $z = x^2 \mod N$;
+  \item $y \leftarrow A\left(z, N\right)$;
+  \item vrať $gcd\left(x-y, N\right)$;
+\end{enumerate} 
+
+Pokud $A$ uspěje při inverzi $z$: 
+\begin{align*}
+  x^2 - y^2 \equiv 0 \left(\mod N\right), \\
+  \left(x-y\right)\left(x+y\right) \equiv 0 \left(\mod N\right).
+\end{align*}
+
+Pak může nastat několik možností:
+\begin{enumerate}
+  \item $p,q$ jsou netriviální faktory $\left(x+y\right)$: $N \mid x+y$,
+  \item $p,q$ jsou netriviální faktory $\left(x-y\right)$: $N \mid x-y$,
+  \item jeden z $p,q$ je netriviální faktor $\left(x+y\right)$ a druhý $\left(x-y\right)$
+\end{enumerate}
+
+$gcd\left(x-y, N\right) \in \left\lbrace p, q\right\rbrace$, pokud $x \not\equiv \pm y \left(\mod N\right)$. Protože $A$ invertuje bez znalosti $x$ a $z$ má $4$ druhé odmocniny v $\mathbb{Z}_N^\ast$, tak s pstí $\ge \frac{1}{2}$ vrátí $A$ \uv{dobré} $y$. S pstí $\ge \frac{\varepsilon\left(n\right)}{2}$ tedy $A'$ faktorizuje náhodné $N$. 
+\qed
+
+Pro $p \equiv q \equiv 3 \left(\mod 4 \right)$ je $f_N: QR_N \rightarrow QR_N$ permutací, kde $QR_N$ jsou kvadratická residua modulo $N$. ($q \in QR_N \Longleftrightarrow \left(\exists{x}\right) x^2 \equiv q \left(\mod N\right)$.)
+
+\podnadpis{Modulární mocnění}
+\begin{itemize}
+  \item klíče: $\mathcal{K} = \left\lbrace\left(p,g\right)\mid p \hbox{ je prvočíslo}, g \hbox{ je generátor }\mathbb{Z}_p^\ast \right\rbrace$,
+  \item generování: $G\left(1^n\right)$ zvol náhodné $n$-bitové prvočíslo $p$ a $g$ generátor $\mathbb{Z}_p^\ast$,
+  \item funkce: $f_{p,g}: \mathbb{Z}_{p-1} \rightarrow \mathbb{Z}_p^\ast$, $f_{p,g}\left(x\right) = g^x \mod p$.
+\end{itemize}
+
+Je permutací pokud ztotožníme $\mathbb{Z}_{p-1}$ s $\mathbb{Z}_p^\ast$.
+
+\podnadpis{Hardcore bity}
+
+RSA: $lsb_{N,e}: \mathbb{Z}_N^\ast \rightarrow \left\lbrace 0,1\right\rbrace$, ($lsb$ - least significant bit). Z hodnot $N, e, x^e \mod N$ neumíme spočítat $lsb_{N,e}\left(x\right)$.
+
+Rabin: $lsb_{N}: \mathbb{Z}_N^\ast \rightarrow \left\lbrace 0,1\right\rbrace$
+ 
+Pro modulární mocnění není $lsb$ hardcore bit. $lsb\left(x\right) = 0 \Leftrightarrow g^x$ je čtverec mod $p$.
+\end{document}
