@@ -1,0 +1,264 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage[utf8]{inputenc}
+
+\begin{document}
+
+%poznámka: k v pk a sk má být velké
+
+\section{Public key encryption}
+
+Umožnilo revoluci v kryptografii tím,
+že odstranilo problém private key encryption
+-- potřebu domluvit se na klíči předem.
+To vycházelo z historického náhledu na šifrování,
+kdy schopnost šifrovat
+$\Leftrightarrow$ schopnost dešifrovat
+$\Leftrightarrow$ znalost klíče
+
+\subsection{Diffie + Hellman (1976)}
+\begin{itemize}
+\item můžou být dva klíče
+\item 1. popis kryptografie s veřejným klíčem (před tím vynalezeno britskou tajnou službou)
+\item public key slouží pro šifrování
+\item kdokoliv může šifrovat
+\item veřejná databáze veřejných klíčů
+\item soukromý klíč umožňuje dešifrování
+\item soukromý klíč nesmí být možné odvodit od veřejného klíče
+\end{itemize}
+
+Předpoklad existence databáze veřejných klíču je netriviální
+-- dosud neexistuje důvěryhodné řešení $\rightarrow$ samostatná přednáška o spravování (někde v přednáškách o aplikované kryptografii)
+
+
+\subsection{Definice Public key encryption scheme}
+\begin{itemize}
+\item trojice algoritmů $(G, E, D)$:
+\item $G$ - generuje dvojice klíčů $(pK, sK) \leftarrow G(^)$
+\item $E$ - pravděpodobnostní algoritmus $c \leftarrow E_{pK}(m)$
+\item $D$ - deterministický algoritmus $m = D_{sK}(c)$
+\end{itemize}
+
+Korektnost:
+    $\forall (m, (pK, sK) \leftarrow G(1^n)) D_{sK}(E_{pK}(m)) = m$
+
+\subsection{Definice Indistinguishability ciphertextů}
+
+Nechť $(G,E,D)$ je PKE na prostoru všech správ $\mathcal{M} = \bigcup_{i \in \mathbb{N}}\mathcal{M}_i$,
+$\forall PPT A$ existuje negligible $\epsilon()$,
+$$\forall m_0,m_1 \in \mathcal{M}_n |\Pr[A(1^n,pK, E_{pK}(m_0))=1]-Pr[A(1^n,pK,E_{pK}(m_1))=1]| \le \epsilon(n) \forall n$$
+kde pravděpodobnost je přes $(pK,sK) \leftarrow G(1^n)$ a náhodné mince $A$ a $E$.
+
+
+$\Rightarrow$ pro PKE máme ekvivalenci ind. ciphertextů a semantic security
+
+
+
+Pro PKE potřebujeme kvalitativně silnější předpoklady
+    nestačí jen existence jednosměrných funkcí
+    potřebujeme jednosměrné permutace se zadními vrátky (trapdoor permutace)
+        one way permutation + trapdoor
+
+
+\subsection{Definice Kolekce trapdoor permutací}
+Kolekce funkcí $F = {f_k \times D_k \rightarrow D_k}$ je kolekcí trapdoor permutací $\iff$
+\begin{itemize}
+\item pro všechny $k$ je $f_k$ permutací
+\item existuje generátor $(k,t)$ kde $t$ je trapdoor
+\item znalost $k$ umožňuje efektivně vybrat efektivně z rovnoměrného rozdělení na $D_k$
+\item znalost $k$ umožňuje efektivně vyhodnotit $f_k(x)$ pro všechny $x \in D_k$
+\item $\forall PPT A \exists negl. \epsilon() \Pr[A(1^n,K,f_K(X)) \in f_K^{-1}(f_K(n))] \le \epsilon(n) \forall n$
+    pro $(K,T) \leftarrow G(1^n), X \leftarrow D_k$ a pro náhodné mince $A$
+
+\item znalost $T$ umožňuje efektivně nalézt $f_k^{-1}(y)$ pro všechna $(k,t) \leftarrow G(1^n)$
+\end{itemize}
+
+Pro PKE potřebujeme schopnost vygenerovat "těžký problém a jeho řešení"
+(nemůžeme si vybrat ten problém)
+Pro trapdoor funkce máme výrazně méně kandidátů než pro jednosměrné funkce
+%obecně mnohem méně heuristických kandidátů než pro jednosměrné funkce
+
+\subsection{Příklad: RSA}
+\begin{itemize}
+\item    kolekce $f_{N,e}: Z_{N}* \rightarrow Z_{N}*$
+\item    $N = pq$
+\item    $e \leftarrow Z* \phi(N)$
+\item    $f_{N,e}(x) = x^e \mod N$
+\item    $t = d; ed = 1 \mod \phi(N)$
+
+\item    inverzní zobrazení:
+    $f_{N,e}^{-1}(y,d) = y^d \mod N$
+
+\item    $y = x^e \mod N => f(y,d)^{-1} = y^d \mod N = x^ed \mod N = x \mod N$
+
+\item    $pK = (e,N)$
+
+\item    $sK = (d)$
+\end{itemize}
+
+Jak generátor spočítá $k,t$?
+\begin{itemize}
+\item    $k = e,N$
+\item    $d = e^{-1}$ v $Z_{\phi N}*$ (pomocí rozšířeného Eukleidova algoritmu)
+\end{itemize}
+
+
+
+
+
+\subsection{Rabinova kolekce TDPs}
+\begin{itemize}
+\item    parametry $p \equiv q \equiv 3 (\mod 4)$, $N = pq$
+\item    trapdoor $(p,q)$
+\item    $fN: QR_N \rightarrow QR_N fN(x) = x^2 mod N$
+\end{itemize}
+
+    inverze:
+        pro $a$ z $QR$ hledáme $z$ takové, aby $a \equiv z^2 mod N$
+
+        $Z_{pq}* \approx Z_p* x Z_q*$
+
+        pro prvočísla se druhá odmocnina hledá velmi snadno
+
+        $z_p \equiv a^{p+1 / 4} mod p$
+        $z_q \equiv a^{q+1 / 4} mod p$
+
+        stačí se podívat na $\pm \alpha z_p \pm \beta z_q$
+        $\alpha \equiv 1 \mod p$
+        $\alpha \equiv 0 \mod q$
+        $\beta \equiv 0 \mod p$
+        $\beta \equiv 1 \mod q$
+
+        dostáváme 4 druhé odmocniny $a$ v $Z_{N}*$
+        právě jedna bude v $QR_N$
+
+
+Konstrukce PKE z TDPs
+    1)
+        vyber $(k,t) \leftarrow G(1^n)$
+    2)
+        $pK = k$
+        $sK = t$
+        $E_{pK}(x) = f_k(x)$
+        $D_{sK}(y) = f_k^{-1}(y)$
+
+INSECURE!!! - Pro RSA nefunguje například pro malé $e$
+
+těch problémů je tam víc
+    všechny RSA standardy mluví o paddingu
+    je potřeba ty zprávy nějak náhodně rozdistribuovat
+
+
+
+
+$OWF \not\rightarrow OWP$
+
+$OWF \not\rightarrow PKE$
+
+Otevřený problém:
+    konstrukce PKE z OWF (když ale nebudu OWF používat jako blackbox)?
+
+Tím, že máme málo kandidátů, hrozí jejich vyřešení (mimo jiné kvantovým počítačem)
+
+
+
+
+konstrukce z hardcore bitů
+
+$M = {0,1}$
+
+$(k,t) \leftarrow G(1^n)$
+
+$pK = k$
+
+$sK = t$
+
+$E_{pK}(m) : m \leftarrow Dk$
+    vrať $fk(x), bk(x) \oplus m$
+
+$D_{sK}(c) : c = c_1, c_2$
+$f_k^{-1}(c_1) = \tilde{x}$
+    vrať $b_k(X) \oplus c_2$
+
+
+Tvrzení:
+    pokud $\{f_k\}$ je kolekce TDPs s hardcore bity $\{b_k\}$
+    pak předešlé schéma splňuje ind. ciphertextů
+
+    adversary nemůže rozpoznat $b_k$ od náhodných
+
+Myšlenka důkazu:
+$$(pK, E_{pK}(0)) \equiv (k, (f_k(x), b_k(x)))
+\equiv_c (k, (f_k(x), R)) \equiv (k, (f_k(x), !R))
+\equiv_c (k, (f_k(x), !b_k(x))) \equiv (pK, E_{pK}(1))$$
+
+
+
+Tohle způsobuje dvojnásobnou délku ciphertextu
+Efektivnější varianta:
+    $M = {0,1}^l$
+    $E_{pK}(m)$:
+        $x \leftarrow Dk$
+        $r = G_l(x) = b_k(x)||b_k(f_k(x))||b_k(f_k^2(x))||...||b_k(f_k^{l-1}(x))$
+        vrať $(f^l_k(x), r \oplus m)$
+Důkaz jako pro $PRG 1 \rightarrow PRG l$
+%když tak to umí Verča
+
+
+-> Blum + Goldwasser
+staví na Rabinově kolekci TDPs
+$p \equiv q \equiv 3 \mod 4$
+$N = pq$
+$pK = N$
+$sK = (p,q)$
+
+$E_{pK}(m)$:
+\begin{enumerate}
+\item $x \leftarrow QR_N$
+\item $r = lsb(x) || lsb(x^2 \mod N) || lsb(x^4 \mod N) || ... || lsb(x^{2^(l-1)} \mod N)$ -- Blum Blum Shub generátor
+\item vrať $c = (x^{2^l} \mod N, r \oplus m)$
+\end{enumerate}
+
+
+$$x_p \equiv y^{((p+1)/4)^l} \mod p$$
+$$x_q \equiv y^{((q+1)/4)^l} \mod q$$
+$$X \equiv q(q^{-1} \mod  p)x_p + p(p^{-1} \mod q)x_q (\mod N)$$
+
+
+\subsection{Diffie-Hellman key exchange}
+mějme cyklickou grupu $G$ řádu $q$ a generátor $g$
+\begin{description}
+\item [Alice:] \ 
+\begin{itemize}
+\item    zvolí náhodně $G,q,g$
+\item    vybere $x \leftarrow Z_q$
+\item    $h_A = g^x$
+\item    pošle $(G, q, g, h_A)$ Bobovi
+\end{itemize}
+\item [Bob:] \ 
+\begin{itemize}
+\item    vybere $y \leftarrow Z_q$
+\item    $h_B = g^y$
+\item    pošle $h_B$ Alici
+\end{itemize}
+
+\item [Oba:]
+    $$k_A = h_B^x = g^{xy} = h_A^y = k_B$$
+\end{description}
+
+vyžaduje to aby diskrétní logaritmus byl těžký
+
+Computational Diffie-Hellman assumption:
+$$G,q,q,g^x,g^y \not\rightarrow g^xy$$
+
+Decision Diffie-Hellman assumption:
+($g^z$ = náhodný prvek $G$)
+
+$$G,q,g,g^x,g^y,g^xy \equiv_c G,q,g,g^x,g^y,g^z$$
+
+
+
+$\rightarrow$ El Gamal (příště (za dva týdny))
+
+\end{document}
