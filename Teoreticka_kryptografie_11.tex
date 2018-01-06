@@ -1,0 +1,259 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\noindent {\bf Tvrzení: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+
+\def\cm{{\rm cm}}
+\def\Comm{{\rm Comm}}
+\def\ramecek#1{\hbox{\vrule\vbox{\hrule\vskip 2pt
+#1
+\hrule}\vrule}}
+
+\begin{document}
+
+
+
+\podnadpis{4. 1. 2018}
+
+\podnadpis{Zero-knowledge pro NP}
+
+Pokud existují OWP (jednosměrné permutace), pak každý jazyk v NP má ZK (zero-knowledge) interaktivní důkaz.
+
+Konstrukce pro jeden NP-úplný jazyk je postačující
+
+\podnadpis{Idea Protocol} pro $L_{3\rm COL}$ (obarvení grafu třemi barvami)
+
+Společný vstup: graf $G$
+
+Proverův vstup: validní obarvení $G$ třemi barvami
+
+1) Prover zvolí permutaci $\pi\leftarrow S_3$ barev, obarví $G$ pomocí toho obarvení (po permutaci), zakryje graf pomocí kalíšků
+
+2) Verifier vybere hranu grafu $e\in E$ a pošle ji proverovi
+
+3) Ten odkryje kalíšky na hraně
+
+4) Verifier akceptuje, pokud je $e$ obarvena různými barvami
+\vskip 5pt
+
+1)--4) opakujeme $|V||E|$krát
+
+\vskip 10pt
+{\noindent\bf Důkaz správnosti:}
+\vskip 5pt
+
+{\bf Soundness} Pokud graf není obarvitelný třemi barvami, verifier zvolí špatně obarvenou hranu s pravděpodobností aspoň $1\over |E|$
+
+Pravděpodobnost podvodu při $|V||E|$ opakováních je  $(1-{1\over|E|})\approx e^{-|V|}=e^{-n}$.
+
+{\bf Completeness} Verifier akceptuje s pravděpodobností $1$ pro $x\in L_{3\rm COL}$.
+\vskip10pt
+
+Co kdyby prover měl nějaké kalíšky, se kterými si může dělat, co chce?
+
+Verifier vidí dvě náhodné různé barvy, je to zero-knowledge. Nepozná, jestli mu prover lže.
+
+Kalíšky = commitment schemes
+
+Prover musí být vždy schopen to otevřít jen na tu hodnotu, která v karbičce/kalíšku byla.
+
+{\noindent \bf Protokol mezi Sender a Receiver} -- má dvě fáze
+
+1) commit -- sender pošle receiverovi commitment c pro hodnotu v
+
+2) reveal -- S pošle R decomitment r pro hodnotu v
+\vskip 10pt
+
+{\noindent \bf Obrázek:}
+
+\ramecek{\halign{\hskip 1pt#\hskip 5pt&#\hskip5pt&#\cr
+S&&R\cr
+$\Comm_r(v),c$&$\rightarrow$&commit\cr
+$v,r$&$\rightarrow$&reveal $c=\Comm_r(v)$\cr
+}}
+\vskip 10pt
+
+\definice(commitment scheme)
+
+PPT algoritmus Comm nazýváme commitment scheme, pokud pro polynom $l$ platí:
+
+1) {\bf Binding} $\forall n\in\mathbb{N},v_0,v_1\in\{0,1\}^n,r_0,r_1\in\{0,1\}^{l(n)}$ platí:
+
+$$\Comm(v_0,r_0)\neq \Comm(v_1,r_1)$$
+
+tzv. Perfectly-binding
+
+2) {\bf Hiding} $\forall PPT$ distinguishera D existuje negligible $\varepsilon$ tž. $\forall n\in N,r_0,r_1\in\{0,1\}^n$
+
+$$|{\rm Pr}_{r\in\{0,1\}^{l(n)}}[D[\Comm(r_0,r))=1]-{\rm Pr}[D(\Comm(r_1,r))=1]|\leq\varepsilon$$ přes náhodné mince D.
+\vskip 10 pt
+
+{\noindent \bf Tvrzení} pokud existují OWP, pak existují schémata pro commitment.
+
+\dukaz konstrukce pro commitment pro jeden bit
+
+(pomocí hybridního argumentu lze rozšířit pro libovolně mnoho bitů)
+
+Nechť f je OWPs hardcore bitem H. Pak můžeme definovat commitment $(b,r)$ jako $f(r)||b\oplus h(r)$
+
+{\bf Binding:} Z konstrukce na základě toho, že f je permutace
+
+{\bf Hiding:} stejný důkaz jako v konstrukci PRG z OWP
+
+\vskip 5pt
+
+%commitment je velmi užitečná věc, najen v životě, atk i v kryptografii
+
+Commitment je důležitý stavební prvek kryptografických protokolů
+
+\podnadpis{Protokol pro $L_{3COL}$}
+
+Společný vstup: $G=(V,E0)$ $|V|=n$
+
+Proverův vstup: wittness $y(c_1,\dots c_n), c_i\in \{1,2,3\}, c_i'=\pi(c_i)$
+
+1) Prover zvolí $\pi\leftarrow S_3$. Pro $i\in\{1,\dots,n\}$ pošle verifierovi $\Comm_{r_i}(c_i')$
+
+2) Verifier zvolí $(i,j)\in E$ a pošle $(i,j)$ P
+
+3) P pošle V $(c_i',r_i)$ a $(c_j',r_j)$
+
+4) V akceptuje, pokud $c_i'\neq c_j'$
+\vskip 5pt
+
+1)--4) opakujeme $n|E|$krát
+\vskip 10pt
+
+\tvrzeni protokol je zero-knowledge interaktivní důkaz pro $|_{COL}$, pokud comm je commitment scheme.
+
+\dukaz completeness + soundness stejné (díky binding)
+\vskip 10pt
+
+{\noindent \bf Obrázek:}
+
+\ramecek{\halign{\hskip 1pt#\hskip 5pt&#\hskip 5pt&#\cr
+P&&V\cr
+$\cm{}_1,\dots \cm{}_n$&$\rightarrow$&commit\cr
+&$\leftarrow$&$(i,j)$\cr
+$(c_i',r_i),(c_j',r_j)$&$\rightarrow$&reveal $c=\Comm_r(v)$\cr
+}}
+\vskip 10 pt
+
+\podnadpis{Simulátor:}
+
+$S(G,Z)$:
+
+1) vyber náhodnou hranu $(i_s, j_s)$ grafu a dvě náhodné barvy za podmínky, že jsou různé
+
+definujme $c_k'=1$ pro $k\notin\{i,j\}$
+
+2) zkonstruuj commitment $cm_i$ pro všechny $c_i'$
+
+emuluj $V^*(x,z,cm_1\dots,cm_n)$
+
+\noindent Nechť odpověď $V^*$ je $(i,j)$
+
+3) Pokud $(i,j)=(i_s,j_s)$, pak otevři $cm_{i_s}$ a $cm_{j_s}$ a vrať odpovídající ${\rm view}_{V^*}=(X,Z, r^*,cm_1,\dots,cm_n, (c_{i_S}',r_{i_S}),(c_{j_S}',r_{j_S}))$
+
+V opačném případě se vrať na 1)
+
+4) Pokud neuspějeme ani po $n|E|$ iteracích, vrať {\tt fail}
+\vskip 10pt
+
+
+\podnadpis{Simulátor pouze pro jednu iteraci protokolu} (pro všechny iterace ze sekvenční kompozice $Z_k$)
+
+Zbývá ukázat, že $\forall$PPT D existuje negl. $\varepsilon$ tž. $\forall x\in L_{3\rm COL},y\in R_{L_{3\rm COL}}(x),z\in\{0,1\}^*$:
+
+$$|{\rm Pr}[D({\rm view\ }V^*(P(x,y)\leftrightarrow V^*(x,z)))=1]-{\rm Pr}[D(S(x,z))=1]|\leq\varepsilon(n)$$
+
+Pro spor předpokládejme, že existuje PPT D, který rozliší $\{{\rm view\ }(P(x,y)\leftrightarrow V^*(x,z))\}$ a $S(x,z)$ s pravděpodobností $\geq{1\over p(n)}$ pro polynom $p$ a nekonečně mnoho $x\in L_{3\rm COL}, y\in R_{3\rm COL}(x)$ a $z\in \{0,1\}^*$
+
+\vskip 10pt
+\podnadpis{Hybridní simulátory}
+
+$S'(x,z,y)$: postupuje jako $S$ kromě volby $c'_{i_S}$ a $c'_{j_S}$
+
+spočítá $\cm_{i_S}$ a $\cm_{j_s}$ jako $P[c_{i_S}'=\pi(c_{i_S})]$ a $P[c_{j_S}=\pi(c_{j_S})]$ pro $\pi \leftarrow S_3$
+
+distribuce $\{S(x,z)\}$ a $\{S'(x,z,y)\}$ jsou identické
+
+$S''(x,z,y)$: postupuje jako $S$, commitment pro obarvení kompletně jako prover
+
+pokud se $V^*$ zeptá na $(i,j)$ různé od $(i_S,j_S)$, pak iteruje znovu a případně vrátí {\tt fail}
+
+pokud $S''$ nevrátí {\tt fail}, pak jsou distribuce
+$\{viewV^*(P(x,y)\leftrightarrow V^*(x,z))\}$ a $\{S''(x,zy)\}$ identické
+
+jsou-li $(i,j)$ a $(i_S,j_S)$ nezávislé, pak $S''$ vrátí {\tt fail} s pravděpodobností$\leq (1-{1\over |E|})^{n|E|}\approx e^{-n}\leq{1\over 2p(n)}$
+
+D rozliší tyhle distribuce s pravděpodobností $\leq{1\over 2p(n)}$
+
+pro distribuce S' a S'' platí, že D je rozlišuje s ppstí alespoň ${1\over 2p(n)}$
+
+$S\equiv S'$ (ppst pro rozlišení $\geq{1\over 2p(n)}$ $S''$ (pravděpodobnost pro rozlišení $\leq {1\over 2p(n)} (P,V^*)$ -- schematicky to, co je napsáno výše
+
+Pro alespoň jeden z hybridů budeme mít přechod, který nám umožní prolomit hiding toho commitmentu
+
+Shrnutí: mezi $S'$ a $S''$ lze zkonstruovat polynomiálně ($q(n)$) mnoho hybridů, které se liší v jednom commitmentu , z toho musí existovat dvojice hybridů, které lze rozlišit s ppstí alespoň $1\over q(n)p(n)$, tedy spor s hiding property commitmentu \hfill$\square$
+
+\podnadpis{Aplikace}
+
+{\bf ZeroCash} -- anonymní varianta BTC na základě ZK
+
+${\rm coin}=(r,sn,\rm cm)$, kde $\cm=\Comm_r(\rm sn)$ (serial number)
+\vskip 10pt
+
+\hbox{\hskip\parindent\vbox{\halign{#\cr
+na ledger umístíme transakci $\rm TX_{Mint}$\cr
+\noalign{\hrule\vskip 2pt}
+cm; 1BTC$\rightarrow$POOL-BEC\hfil\cr}}}
+\vskip 10pt
+
+pro utracení zveřejníme sn a dokážeme pomocí ZK
+
+znám $r$ tž. $\cm=\Comm_r(\rm sn)$ je v CMList
+\vskip 10pt
+
+\hbox{\hskip\parindent\vbox{\halign{#\cr
+$\rm tx_{spent}$\cr
+\noalign{\hrule\vskip 2pt}
+sn,$\pi$,1ZEC=1BTC\cr}}}
+\vskip 10pt
+
+máme tzv. ZK-SNARK $=$  ZK-sufficient non-interactive argument of knowledge
+
+$\pi$ -- důkaz má konstantní délku a je neinteraktivní
+
+--veřejně ověřit!
+
+pro aplikaci výše můžeme dokazovat, že je Listem pro CMTree s kořenem Root
+
+2014 -- ZK-verifikace transakce u BTC
+\vskip 10pt
+
+\podnadpis{Předpoklady} \noindent dělíme na :
+
+{\bf Falsifiable} -- lze falsifikovat (neexistuje algoritmus na\dots)
+
+{\bf Non-falsifiable} -- \uv{pro každý vstup existuje algoritmus\dots}
+
+{\bf False} -- můžeme pro tento předpoklad dokázat, co chceme :)
+
+\end{document}
