@@ -1,0 +1,173 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+\def\definice{\medskip\noindent {\bf Definice: }}
+\def\priklad{\noindent {\bf Příklad: }}
+\def\tvrzeni{\medskip\noindent {\bf Tvrzení: }}
+\def\veta{\noindent {\bf Věta: }}
+\def\dukaz{\noindent {\bf Důkaz: }}
+\def\qed{{\hfill{$\square$}}}
+\def\m#1{{\mathcal{#1}}}
+\def\sskip{\medskip}
+
+\begin{document}
+\podnadpis{21. 12. 2017}
+
+\podnadpis{Zero knowledge}
+
+Co když Alice nevěří Bobovi?
+
+\noindent Alice chce dokázat Bobovi, že $x\in L$ tak, aby Bob uvěřil, ale nebyl schopen důkaz replikovat.
+
+\noindent Alice má $N=pq$ a chce dokázat, že je složené, tak, aby Bob nevěděl $p$ a $q$ (crypto aplikace)
+
+\noindent Kde je Waldo (Wally)?
+
+Položíme knížku na stůl a překryjeme dostatečně velkým papírem s okénkem. Buď v okénku najdeme Wallyho, nebo pod papírem knížku, ale nemáme informaci o tom, kde se Wally na stránce nachází.
+
+\podnadpis{Interaktivní protokoly}
+
+Alice, Bob, interaktivní TS
+
+mají společný vstup $x$ a sdílejí komunikační pásky
+
+interakce probíhá po kolech
+
+Exekuce je dvojice
+$$(V_A,V_B)=((x,z_1,r_1,M_a),(x,z_2,r_2,M_B)),$$
+kde $x$ je vstup, $z$ anxiliary input, $r$ mince a $M_A$ zprávy od Boba (podobně $M_B$). Platí:
+$$M_a=\{m_A^1,m_A^2, \dots\},\ M_B=\{m_B^1,m_B^2, \dots\},\ x,r_i,z_i\in \{0,1\}^*.$$
+
+Interakci mezi TM$(A,B)$ značíme $A(r_1,z_1)\leftrightarrow B(r_2,z_2)$ a mějme odpovídající náhodné proměnné (pokud $r_1,r_2\in \{0,1\}^k$): $V_A$ je view $A$, podobně $V_B$ je view $B$, out$_x(e),\ x\in\{A,B\}$ výstup příslušného stroje a $m^i_A$ je $i$tá zpráva od Boba
+
+\podnadpis{Interactive proof}
+
+$P$ prover, $V$ verifier
+
+Dvojice interaktivních TS $A$ a $B$ je interaktivní důkaz pro jazyk $L$, pokud $V$ je PPT a platí:
+
+\begin{enumerate}
+
+\item {\bf Completeness} \dots $x\in L\exists y\in\{0,1\}^*$ t.ž. $\forall z\in\{0,1\}^*:$
+$${\rm Pr}[{\rm out}_V[P(x,y)\leftrightarrow V(x,z)]=1]=1$$
+\item {\bf Soundness} \dots $\exists {\rm reg}! z$ t.ž. $\forall x\notin L\ \forall PPT P^*$ a $\forall z\in\{0,1\}^*$ ($|x|=n$):
+$${\rm Pr}[{\rm out}_V[P^*(x)\leftrightarrow V(x,z)]=1]\leq\epsilon(n)\footnote{Tady může mít prover informaci $y$ v sobě zakódovanou}$$
+
+\end{enumerate}
+
+Buď IP třída jazyků, ketré mají interaktivní důkaz (NP$\subseteq$IP)
+
+Shamir: IP=PSPACE
+
+\podnadpis{Interaktivní důkaz pro neizomorfismus grafů}
+
+$G_0=(V_0,E_0), G_1=(V_1,E_1)$ (oba na $n$ vrcholech), definuji izomorfismus $\exists \sigma\in S_n$ t.ž. $\sigma(G_0)=G_1$.
+
+Izomorfismus grafů $L_{\rm ISO}\subset\rm NP$, neizomorfismus grafů $L_{\rm NISO}\subset\rm coNP$.
+
+\podnadpis{Protokol pro $L_{\rm NISO}$}
+
+Společný vstup je $X=(G_0,G_1)$
+
+\begin{enumerate}
+
+\item Verifier $V(X)$ zvolí náhodně bit $b$ a permutaci $\sigma$.
+
+\item Pošle proverovi $H=\sigma(G_b)$.
+
+\item Prover najde $b'$ t.ž. $H\sim G_{b'}$.
+
+\item Pošle $b'$ verifierovi.
+
+\item Verifier vrátí 1, pokud $b=b'$
+
+\end{enumerate}
+
+Opakuj $n$krát.
+
+\tvrzeni $(P,V)$ je interaktivní důkaz pro $L_{\rm NISO}$.
+
+\dukaz Completeness: $x\in L_{\rm NISO} \Rightarrow P$ vždy najde $b'=b$
+
+\noindent Soundness: $x\in L_{\rm ISO} \Rightarrow$ pst. úspěchu v jednom pokusu je právě $1/2$ \qed
+
+\noindent{\bf Najít si:}
+
+zero cash, měny s anonymitou, prakticky použitelné aplikace pro kryptografické problémy
+
+Pro přirozené jazyky v NP program dává nějakou hodnotu na vstupu%??????????????????
+
+\podnadpis{Exektivní interaktivní důkaz pro G.ISOMORFISMUS}
+
+Společný vstup $X=(G_0,G_1)$, $|V_0|=|V_1|$
+
+svědkem pro $P$ je $\sigma$ t.ž. $\sigma(G_1)=G_0$.
+
+Prover zvolí $\pi\leftarrow S_n$, $H=\pi(G_0)$ a pošle $V$ graf $H$.
+
+$V$ zvolí bit $b$ a pošle proverovi
+
+Pokud $b=0$, $P$ pošle $\pi$, jinak pošle $\pi'=\pi\circ\sigma$ (tedy $H=\pi'(G_1)$)
+
+Verifier ověří, že dostal správný izomorfismus.
+
+Opakujeme $n$ krát.
+
+\tvrzeni $(P,V)$ je interaktivní důkaz pro $L_{\rm ISO}$.
+
+\dukaz\ Completeness: Jsou-li grafy izomorfní, prover umí pro oba případy odpovědět.
+
+Soundness: Nejsou-li izomorfní, v jednom pokusu umí prover odpovědět nejvýš s pravděpodobností $1/2$, neboť $H$ může být izomorfní jen jednomu grafu. 
+
+Zero knowledge: V se z protokolu nedozví vůbec nic.\qed
+
+\definice (Honest verifier zero knowledge)
+
+Nechť $P_V$ je interaktivní důkaz pro jazyk $L\in NP$ se svědeckou relací $R_L$. Bere svědecké relace a vrací 0 nebo 1.
+
+Řekneme, že $(P,V)$ je Honest verifier zero knowledge, pokud existuje PPT simulátor t.ž. $\forall$ PPT distinguishery $D$ $\exists$ negligible $\varepsilon:\forall x\in L,y\in R_L(x)$ a $z\in\{0,1\}^*$ $D$ rozliší následující distribuce s pravděpodobností nejvýše $\varepsilon(|x|)$:
+
+$\{$view$_V[P(x,y)\leftrightarrow V(x,z)]\}$ vs. $\{S(x,z)\}$
+
+\definice (Zero knowledge)
+
+$\forall$PPT$ P^*$ $\exists$ expected PPT\footnote{očekávaný polynomiální čas} simulátor $S:\ \{$view$_{V^*}[P(x,y)\leftrightarrow V^*(x,y)]\}$
+
+\tvrzeni $(P,V)$ je zero knowledge důkaz pro $L_{\rm ISO}$
+
+\dukaz simulátor $S(x,z)\ \forall V^*$ pro jednu iteraci
+
+\begin{enumerate}
+
+\item vyber bit $b'$, $\pi in S_n$:\ $H=\pi(G_b)$
+
+\item emuluj $V_r^*$ se vstupem $x,z$ pro $r\leftarrow\{0,1\}^k$ na vstupu $H$ pro $k$
+
+dostaneme $b=V^*_r(x, z,H)$
+
+\item pokud $b=b'$, vrať view$_{V^*}(x,z,r,H,b,\pi)$, jinak se vrať do 2. a opakuj
+
+\end{enumerate}
+
+a) S pracuje v očekávaném poly čase, distribuce jsou stejné
+
+b) při exekuci $S(x,z)$ má $H$ stejnou distribuci jako $\pi(G_0)$ a Pr$[b'=b]=\frac{1}{2}$
+
+když $g_0, G_1$ jsou izomorfní, pak $\{\pi(G_0\}$ a $\{\pi(G_1)\}$ jsou stejné $\Rightarrow$ distribuce $H,\pi(G_0)$ jsou stejné.
+
+distribuce $H,b'$ jsou nezávislé $\Rightarrow$ $V^*$ má na vstupu pouze $H$, které nezávisí na $b'$, protože $b'$ je rovnoměrně rozdělené
+
+a) z lemmatu, protože očekávaný počet iterací jsou 2 a jednotlivé iterace jsou PPT
+
+b) $H$ nezávisí na $b'$, $\pi$ nezávisí na $b'$ $\Rightarrow$ distribuce $\pi$ se nezmění
+
+\end{document}
