@@ -57,14 +57,14 @@ Dvojice interaktivních TS $A$ a $B$ je interaktivní důkaz pro jazyk $L$, poku
 
 \begin{enumerate}
 
-\item {\bf Completeness} \dots $x\in L\exists y\in\{0,1\}^*$ t.ž. $\forall z\in\{0,1\}^*:$
+\item {\bf Completeness} \dots $x\in L\ \exists\, y\in\{0,1\}^*$ t.ž. $\forall z\in\{0,1\}^*:$
 $${\rm Pr}[{\rm out}_V[P(x,y)\leftrightarrow V(x,z)]=1]=1$$
-\item {\bf Soundness} \dots $\exists {\rm reg}! z$ t.ž. $\forall x\notin L\ \forall PPT P^*$ a $\forall z\in\{0,1\}^*$ ($|x|=n$):
-$${\rm Pr}[{\rm out}_V[P^*(x)\leftrightarrow V(x,z)]=1]\leq\epsilon(n)\footnote{Tady může mít prover informaci $y$ v sobě zakódovanou}$$
+\item {\bf Soundness} \dots $\exists\, {\rm reg}!\, z$ t.ž. $\forall x\notin L,\ \forall {\rm PPT\ } P^*$ a $\forall z\in\{0,1\}^*$ ($|x|=n$):
+$${\rm Pr}[{\rm out}_V[P^*(x)\leftrightarrow V(x,z)]=1]\leq\epsilon(n)$$(Tady může mít prover informaci $y$ v sobě zakódovanou)
 
 \end{enumerate}
 
-Buď IP třída jazyků, ketré mají interaktivní důkaz (NP$\subseteq$IP)
+Buď IP třída jazyků, které mají interaktivní důkaz (NP$\,\subseteq\,$IP)
 
 Shamir: IP=PSPACE
 
@@ -99,10 +99,10 @@ Opakuj $n$krát.
 \dukaz Completeness: $x\in L_{\rm NISO} \Rightarrow P$ vždy najde $b'=b$
 
 \noindent Soundness: $x\in L_{\rm ISO} \Rightarrow$ pst. úspěchu v jednom pokusu je právě $1/2$ \qed
+\medskip
 
-\noindent{\bf Najít si:}
-
-zero cash, měny s anonymitou, prakticky použitelné aplikace pro kryptografické problémy
+\noindent{\bf Najít si:} zero cash, měny s anonymitou, prakticky použitelné aplikace pro kryptografické problémy
+\smallskip
 
 Pro přirozené jazyky v NP program dává nějakou hodnotu na vstupu%??????????????????
 
@@ -120,7 +120,7 @@ Pokud $b=0$, $P$ pošle $\pi$, jinak pošle $\pi'=\pi\circ\sigma$ (tedy $H=\pi'(
 
 Verifier ověří, že dostal správný izomorfismus.
 
-Opakujeme $n$ krát.
+Opakujeme $n$krát.
 
 \tvrzeni $(P,V)$ je interaktivní důkaz pro $L_{\rm ISO}$.
 
@@ -140,7 +140,7 @@ $\{$view$_V[P(x,y)\leftrightarrow V(x,z)]\}$ vs. $\{S(x,z)\}$
 
 \definice (Zero knowledge)
 
-$\forall$PPT$ P^*$ $\exists$ expected PPT\footnote{očekávaný polynomiální čas} simulátor $S:\ \{$view$_{V^*}[P(x,y)\leftrightarrow V^*(x,y)]\}$
+	$\forall$PPT$\ P^*$ $\exists$ expected PPT (očekávaný polynomiální čas) simulátor $$S:\ \{{\rm view}_{V^*}[P(x,y)\leftrightarrow V^*(x,y)]\}$$
 
 \tvrzeni $(P,V)$ je zero knowledge důkaz pro $L_{\rm ISO}$
 
@@ -148,7 +148,7 @@ $\forall$PPT$ P^*$ $\exists$ expected PPT\footnote{očekávaný polynomiální �
 
 \begin{enumerate}
 
-\item vyber bit $b'$, $\pi in S_n$:\ $H=\pi(G_b)$
+\item vyber bit $b'$, $\pi {\rm \ in\ } S_n$:\ $H=\pi(G_b)$
 
 \item emuluj $V_r^*$ se vstupem $x,z$ pro $r\leftarrow\{0,1\}^k$ na vstupu $H$ pro $k$
 
