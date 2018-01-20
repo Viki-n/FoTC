@@ -18,7 +18,7 @@ Pro podpis libovolně dlouhé zprávy nejprve aplikujeme hash $h$ a pak až digi
 Požadavky:
 \begin{itemize}
 \item Výstup $h$ je ostře menší než vstup: $|h(m)| << |m|$.
-\item Funkce $h$ je efektivně zpočitatelná.
+\item Funkce $h$ je efektivně spočitatelná.
 \item Je těžké efektivně nalézt kolizi: $(m,m'): m\neq m'$ a $h(m) = h(m')$.
 \end{itemize}
 
@@ -89,7 +89,7 @@ H(M) = h\Bigl(M_t || h\bigl(M_{t-1} || h(M_{t-2} \dots h(M_1 || IV) \dots)\bigr)
 kde $IV$ je inicializační vektor nastaven například na samé 0.
 \end{enumerate}
 \end{enumerate}
-Schéma transofrmace je zobrazeno na následujícím obrázku.
+Schéma transformace je zobrazeno na následujícím obrázku.
 \begin{figure}[h]
 \centering
 \includegraphics{MD_transformace.pdf}
@@ -150,7 +150,7 @@ SHA2/SHA256 & 2005 & 256 & Zatím neprolomen & \textbullet~Heuristický kandidá
 \section{Hash-then-Sign}
 Nyní ukážeme, že pokud existují kolekce CRHF's pak existují schémata elektronického podpisu pro libovolně dlouhé zprávy.
 Nechť $(G,S,V)$ je one-time elektronický podpis pro ${\sc M} = \{0,1\}^n$ a $H$ je kolekcí CRHF's pro $\{0,1\}^*$ s výstupy délky $n$.
-Zkonstruujeme one-time elektrronický podpis $(G',S',V')$ pro zprávy libovolné délky.
+Zkonstruujeme one-time elektronický podpis $(G',S',V')$ pro zprávy libovolné délky.
 \begin{description}
 \item[$G'$:] $pk'=(pk,i), sk'=(sk,i)$, kde $(pk,sk) \leftarrow G(1^n)$ a pro generátor $G_H$ z $H$: $i \leftarrow G_H(1^n)$.
 \item[$S'$:] $S'_{sk}(m) = S_sk\bigl(h_i(m)\bigr)$.
@@ -180,8 +180,8 @@ kde $|x_i| = \ell$.
 Můžeme předpokládat, že $|X| = \ell t$ a $t$ je mocnina 2, jinak použijeme padding nulami.
 Mějme binární strom s $t$ listy.
 Ke každému vrcholu $v$ přiřadíme hodnotu $c_X(v) \in \{0,1\}^\ell$.
-Do listů umistíme bloky $x_i$ a následně počítáme hashe od listu nahoru.
-Mějme vrchol $v$ jehož syni $v_1$ a $v_2$ již mají spočítané hodnoty $c(v_1)$ a $c(v_2)$ pak hodnota na vrcholu $v$ bude $c_X(v) = h\bigl(c_X(v_1) || c_X(v_2)\bigr)$. 
+Do listů umístíme bloky $x_i$ a následně počítáme hashe od listu nahoru.
+Mějme vrchol $v$ jehož synové $v_1$ a $v_2$ již mají spočítané hodnoty $c(v_1)$ a $c(v_2)$ pak hodnota na vrcholu $v$ bude $c_X(v) = h\bigl(c_X(v_1) || c_X(v_2)\bigr)$. 
 Označme $MT_h(X)$ hodnotu v kořeni stromu.
 
 Příklad použití: chceme uložit data na serveru a mít možnost ověřit, že server data nezměnil bez toho aniž bychom si daná data pamatovali.
