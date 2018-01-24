@@ -1,0 +1,152 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage[IL2]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[czech]{babel}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{textcomp}
+
+\def\nadpis#1{{\bigskip\large\bf\noindent{#1}}\par\bigskip}
+\def\podnadpis#1{{\bigskip\bf\noindent#1\medskip\par}}
+
+\begin{document}
+\nadpis{Bitcoin}
+\begin{itemize}
+\item{Protokol pro distribuovaný konsenzus.}
+\item{Vytvořen v~2009 skupinou Sastoshi Nakamoto.}
+\item{Používá proof of work.}
+\item{Search puzzle}
+	\begin{itemize}
+		\item{Mějme hashovací funkcí \(H : \{0, 1\}^{*} \rightarrow \{0, 1\}^n\)}
+		\item{Puzzle ID \(\leftarrow\) D, kde D má dostatečnou min. entropii.}
+		\item{Cílová množina \(S \subset \{0, 1\}^n\)
+			Řešením je \(x\) t.ž \(H(D || x) \in S\).}
+		\item{Podle velikosti \(S\) můžeme určit obtížnost. 
+			Pro \(S = \{0, 1\}^n\) je řešení triv.
+			Pro \(S = \) jeden řetězec nemusí řešení existovat.} 
+		\item{Pro nalezení řešení počet evaluací \(H\) odpovídá velikosti \(S\).}
+		\item{Pro ověření řešení stačí jen jedno vyhodnocení funkce \(H\).}
+	\end{itemize}
+\end{itemize}
+\podnadpis{Blockchain}
+\begin{itemize}
+\item{Spojový seznam s~hash pointery na předchozí prvek v~seznamu.}
+%%Obrázek
+	\begin{itemize}
+		\item{Jeho výhodou je, že omezuje ex-post manipulaci.
+
+			Čím hlouběji bychom chtěli editovat seznam, tím víc kolizí \(H\) musíme řešit.}
+	\end{itemize}
+\item{Hešovací funkce SHA-256}
+\item{Elektronický podpis}
+	\begin{itemize}
+		\item{Alg. Ecliptic Curve Digital Signature}
+		\item{Místo \(Z_n^*\) používá množinu odpovídající eliptické křivce.}
+	\end{itemize}
+
+\item{Registrace uživatele}
+	\begin{itemize}
+		\item{Nový uživatel vygeneruje soukromý a veřejný klíč pro SHA-256, jeho identita odpovídá veřejnému klíči.}
+		\item{Jeden uživatel může mít více identit.}
+	\end{itemize}
+
+\item{Konsenzus}
+	\begin{itemize}
+		\item{Je třeba se dohodnout na~platné historii transakcí.}
+		\item{Problém byzantských generálů}
+		\begin{itemize}
+			\item{Generálové na různých místech se mají dohodnout na tom, zda zaútočit nebo se stáhnout.
+				Zprávy o~jejich rozhodnutí se můžou ztratit a navíc mezi sebou můžou mít zrádce, 
+				který může tvrdit různým generálům různé věci. }
+			\item{Dokázalo se, že pokud je zrádců méně než polovina, tak lze tento problém vyřešit.}
+			\item{Řešení nelze použít pro BTC, protože předpokládají, 
+				že nikdo nemůže poslat zprávu jako někdo jiný 
+				a navíc si nemůže vytvořit více identit a přehlasovat tak ostatní.}
+		\end{itemize}
+		\item{Permissionless setting - kdokoliv se může zúčastnit transakcí a ověřování bloků.}
+		
+	\end{itemize}
+\end{itemize}
+
+\podnadpis{Hlavní myšlenka fungování BTC}
+\begin{enumerate}
+	\item{Transakce jsou přijímány uživateli.}
+	\item{Každý uživatel vybere nové transakce a vytvoří z~nich nový blok \(B\).}
+	\item{Jeden z~uživatelů je vybrán náhodně a jeho blok \(B\) je přidán ke stávajícímu blockchainu.
+			Na to potřebujeme konsenzus.}
+	\item{Nový blok bude odkazovat na \(B\).}
+\end{enumerate}
+
+\begin{itemize}
+	\item{Transakce}
+		\begin{itemize}
+			\item{Pro provedení transakce je potřeba většinou znát předchozí. 
+				Jednou z výjimek je coinbase.}
+			\item{Syntax}
+				\begin{itemize}
+					\item{Inputs:
+						seznam hash-pointerů na předchozí transakce a podpis příjemce}
+					\item{Outputs:
+						seznam adres příjemců a script}
+				\end{itemize}
+			\item{Script} 
+				\begin{itemize}
+					\item{Seznam instrukcí, jak příjemce dostane převáděné BTC.}
+					\item{Používá jednoduchý programovací jazyk, který je stack-based, bez cyklů. 
+						Ale i tak s~ním lze napsat \uv{smart-contracts} jako například escrow.}
+					\item{ESCROW - Typ transakce zprostředkovávaný třetí stranou, které jsou zaslány peníze.
+						Ty odešle druhé straně až po dodržení 
+						všech předem dohodnutých podmínek mezi odesilatelem a příjemcem.}
+				\end{itemize}
+			\item{Coinbase -- typ transakce bez Inputs. 
+			 	Uživatel, který vytvořil blok, dostane BTC za nalezení
+				a navíc poplatky od ostatních uživatelů za to, 
+				aby jejich transakce byla v~bloku před ostatními.}
+		\end{itemize}
+	\item{Mining}
+		\begin{enumerate}
+			\item{Sesbíráme transakce a spočteme Merkel root.}
+			\item{Vybereme hash posledního bloku v~blockchainu.}
+			\item{Spočteme nonce (proof of work) a spočteme hash našeho bloku.
+				Pokud je validní, tak blok zašleme ostatním. Pokud ne zkusíme novou nonce.}
+		\end{enumerate}
+		
+		\begin{itemize}
+			\item{Validita -- je dán globální parametr \(d\) -- difficulty. 
+			Hash bloku interpretujeme jako desetinné číslo a to musí být menší než \(d\).}
+			\item{Chceme, aby nový blok byl nalezen cca každých \(10\) minut. 
+				Parametr \(d\) je každých \(2016\) bloků přepočítán tak, aby tato podmínka byla splněna.
+				\[d = \frac{10 d }{\text{Čas potřebný na nalezení posledních 2016 bloků}}\]
+				Každý blok obsahuje timestamp, aby se tento čas dal zjistit.}
+			\item{Blokchain lze najít na \texttt{blockchain.info}}
+		\end{itemize}
+	\item{Security}
+		\begin{itemize}
+			\item{Není anonymní -- každý uživatel má daný veřejný klíč a navíc všechny provedené transakce, 
+			lze najít veřejně v~blockchainu.}
+			\item{Double spending -- 
+				použijeme stejné bitcoiny víckrát.
+				BTC řeší tento problém tak, že příjemci čekají na potvrzení transakce. 
+				Transakce je potvrzená, pokud je dost bloků hluboko. \(\implies\) Pak je těžké bloky modifikovat.}
+			\item{Selfish mining --
+				miner neodešle hned svůj blok, ale rovnou začne pracovat na dalším. 
+				Část svých bloků odešle, až když se někdo další bude blížit dalšímu bloku.
+				Dostane tak za nalezení bloků, víc než by měl.}
+			\item{Pokud má adversary méně než \(\frac{1}{3}\) výpočetního výkonu v~síti, 
+				tak nemůže nic \uv{zásadního} provést. 
+				Zatím nedokázáno, není žádný rozumný model.}
+		\end{itemize}
+\end{itemize}
+	
+\podnadpis{Nevýhody}
+	\begin{itemize}
+		\item{Sdružování uživatelů do poolů. 
+		Pokud se sdruží více uživatelů, kteří mají dohromady více jak polovinu výpočetní síly v~systému, 
+		tak by mohli \uv{ovládnout} BTC.}
+		\item{Spotřeba energie.}
+		\item{Škálovatelnost. Nelze provést dost transakcí dostatečně rychle, 
+			aby BTC mohl konkurovat systémům jako VISA. Zvětšení bloků není řešení, zvýšíme tak latenci.}
+	\end{itemize}
+\end{document}
